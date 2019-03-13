@@ -1,3 +1,4 @@
+-- here
 CREATE TABLE car (
   name VARCHAR(25) NOT NULL,
   PRIMARY KEY(name)
