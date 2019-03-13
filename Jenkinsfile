@@ -19,6 +19,7 @@ pipeline {
             }
             steps {
                 echo 'Run Flyway Migration'
+		unstash 'db'
                 sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL migrate'            }
         }
     }
