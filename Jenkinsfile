@@ -7,7 +7,6 @@ pipeline {
                 echo 'Run Flyway Github'
                 git 'https://github.com/aboussetta/flyway.git'
 		checkout scm
-                sh 'make'
                 stash includes: '*.sql', name: 'db' 
             }
         }
