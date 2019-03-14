@@ -9,12 +9,12 @@ pipeline {
 		checkout scm
                 stash includes: '*.sql', name: 'db' 
 		sh 'cd /Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/sql'
-                git clone 'https://github.com/aboussetta/flyway.git'
+                git "clone 'https://github.com/aboussetta/flyway.git'"
             }
         }
         stage('Build - DB Migration') {
             environment {
-		FLYWAY_LOCATIONS='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/sql/flyway'
+		FLYWAY_LOCATIONS='filesystem:./sql/flyway'
                 FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
                 FLYWAY_USER='flyway'
                 FLYWAY_PASSWORD='flyway_123'
