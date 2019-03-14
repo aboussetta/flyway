@@ -13,7 +13,7 @@ pipeline {
         }
         stage('Build - DB Migration') {
             environment {
-		FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
+		FLYWAY_LOCATIONS='filesystem:./Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
                 FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
                 FLYWAY_USER='flyway'
                 FLYWAY_PASSWORD='flyway_123'
@@ -22,7 +22,8 @@ pipeline {
             steps {
                 echo 'Run Flyway Migration'
 		unstash 'db'
-                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL migrate'            }
+                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL locations=$FLYWAY_LOCATIONS migrate'            
+	    }
         }
     }
 }
