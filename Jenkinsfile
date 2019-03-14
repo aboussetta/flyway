@@ -25,6 +25,19 @@ pipeline {
                 sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
 	    }
         }
+	stage('Dev - DB Deployment') {
+            environment {
+		FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
+                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/ST_FLYWAY'
+                FLYWAY_USER='flyway_stage'
+                FLYWAY_PASSWORD='flyway_123'
+                FLYWAY_SCHEMAS='FLYWAY_STAGE'
+            }
+            steps {
+                echo 'Run Flyway Migration'
+		unstash 'db'
+                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
+	    }
+        }
     }
 }
-
