@@ -1,3 +1,8 @@
+@Library('tools') import demo.Servers
+
+jettyUrl = 'http://localhost:8081/'
+servers = new Servers(this)
+
 pipeline {
     agent any
 
@@ -21,11 +26,11 @@ pipeline {
             }
             steps {
                 echo 'Run Flyway Migration'
-				unstash 'db'
-                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
+		unstash 'db'
+                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 	    	}
         }
-
+	milestone 1
         stage('Parallel - Dev Deployment') {
             failFast true // first to fail abort parallel execution
             parallel {
@@ -39,8 +44,9 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-						unstash 'db'
-		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
+				unstash 'db'
+		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
+				input message: 'Continue?'
 			    }
 		 }
 		 stage('DEVB - DB Deployment') {
@@ -53,12 +59,14 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-						unstash 'db'
+				unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
-			    	}
+			    	input message: 'Continue?'	
+			    }
 		        }
 		    }
 		}
+	    milestone 2
 	    stage('Parallel - Stage Deployment') {
             	failFast true // first to fail abort parallel execution
             	parallel {
@@ -72,9 +80,10 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-						unstash 'db'
+				unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
-			    	}
+			    	input message: 'Continue?'
+			    }
 		        }
 		        stage('STB - DB Deployment') {
 		            environment {
@@ -86,11 +95,12 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-						unstash 'db'
+				unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
+			    	input message: 'Continue?'
 			    }
 		        }
-		    }    
-		}
+		}    
+	}
     }
 }
