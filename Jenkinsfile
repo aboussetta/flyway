@@ -9,7 +9,7 @@ pipeline {
 		checkout scm
                 stash includes: '*.sql', name: 'db' 
 		sh 'cd /Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/sql'
-                git clone 'https://github.com/aboussetta/flyway.git'
+                git 'https://github.com/aboussetta/flyway.git'
             }
         }
         stage('Build - DB Migration') {
