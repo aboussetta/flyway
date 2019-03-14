@@ -44,7 +44,6 @@ pipeline {
 		                echo 'Run Flyway Migration'
 				unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
-				input message: 'Continue?'
 			    }
 		 }
 		 stage('DEVB - DB Deployment') {
@@ -80,7 +79,6 @@ pipeline {
 		                echo 'Run Flyway Migration'
 				unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
-			    	input message: 'Continue?'
 			    }
 		        }
 		        stage('STB - DB Deployment') {
