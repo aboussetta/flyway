@@ -59,7 +59,7 @@ pipeline {
 	    }
 
 	    stage('Parallel - Stage Deployment') {
-            failFast true // first to fail abort parallel execution
+            	failFast true // first to fail abort parallel execution
 
 		stage('STA - DB Deployment') {
 	            environment {
