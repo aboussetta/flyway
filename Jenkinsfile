@@ -14,7 +14,7 @@ pipeline {
         }
         stage('Build - DB Migration') {
             environment {
-		FLYWAY_LOCATIONS='filesystem:./sql/flyway'
+		FLYWAY_LOCATIONS='filesystem:./Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
                 FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
                 FLYWAY_USER='flyway'
                 FLYWAY_PASSWORD='flyway_123'
