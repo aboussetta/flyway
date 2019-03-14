@@ -28,7 +28,6 @@ pipeline {
                 sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 	    	}
         }
-	milestone 1
         stage('Parallel - Dev Deployment') {
             failFast true // first to fail abort parallel execution
             parallel {
@@ -58,12 +57,15 @@ pipeline {
 		                echo 'Run Flyway Migration'
 				unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
-			    	input message: 'Continue?'	
+			    	script {
+                    			timeout(time: 1, unit: 'DAYS') {
+                        			input message: 'Approve deployment?'
+                    			}
+                		}	
 			    }
 		        }
 		    }
 		}
-	    milestone 2
 	    stage('Parallel - Stage Deployment') {
             	failFast true // first to fail abort parallel execution
             	parallel {
@@ -93,7 +95,11 @@ pipeline {
 		                echo 'Run Flyway Migration'
 				unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
-			    	input message: 'Continue?'
+			    	script {
+                    			timeout(time: 1, unit: 'DAYS') {
+                        			input message: 'Approve deployment?'
+                    			}
+                		}	
 			    }
 		        }
 		}    
