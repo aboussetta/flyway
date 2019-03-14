@@ -1,7 +1,5 @@
-@Library('tools') import demo.Servers
 
 jettyUrl = 'http://localhost:8081/'
-servers = new Servers(this)
 
 pipeline {
     agent any
