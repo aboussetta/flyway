@@ -99,11 +99,12 @@ pipeline {
                     			timeout(time: 1, unit: 'DAYS') {
                         			input message: 'Approve deployment?'
                     			}
-                		}	
+                		}
 			    }
+			githubPRComment comment: githubPRMessage('Build ${BUILD_NUMBER} ${BUILD_STATUS}'), statusVerifier: allowRunOnStatus('SUCCESS')
+
 		        }
 		}    
 	}
     }
-githubPRComment comment: githubPRMessage('Build ${BUILD_NUMBER} ${BUILD_STATUS}'), statusVerifier: allowRunOnStatus('SUCCESS')
 }
