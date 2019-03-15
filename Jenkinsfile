@@ -1,6 +1,4 @@
 
-jettyUrl = 'http://localhost:8081/'
-
 pipeline {
     agent any
 
