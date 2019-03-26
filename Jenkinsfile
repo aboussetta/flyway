@@ -70,7 +70,7 @@ pipeline {
 	    stage('Parallel - Stage Delivery') {
             	failFast true // first to fail abort parallel execution
             	parallel {
-			stage('STA - DB Deployment') {
+			stage('STA - DB Delivery') {
 		            environment {
 					FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
 					FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/STA_FLYWAY'
