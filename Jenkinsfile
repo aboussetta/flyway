@@ -96,15 +96,19 @@ pipeline {
 		                echo 'Run Flyway Migration'
 				unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
-			    	script {
-                    			timeout(time: 1, unit: 'DAYS') {
-                        			input message: 'Approve deployment?'
-                    			}
-                		}
+			
 			    }
 		        }
 		}   
 	}
+	stage('Results') {
+                 	script {
+                    			timeout(time: 1, unit: 'DAYS') {
+                        			input message: 'Approve deployment?'
+                    			}
+                		}
+   	}
+
     }
  post {
         always {
