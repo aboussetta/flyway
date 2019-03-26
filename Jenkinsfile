@@ -102,11 +102,13 @@ pipeline {
 		}   
 	}
 	stage('Results') {
+		steps {
                  	script {
                     			timeout(time: 1, unit: 'DAYS') {
                         			input message: 'Approve deployment?'
                     			}
                 		}
+		}
    	}
 
     }
