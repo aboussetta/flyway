@@ -29,10 +29,10 @@ pipeline {
                 sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 	    	}
         }
-        stage('Parallel - Dev Deployment') {
+        stage('Parallel - Dev Delivery') {
             failFast true // first to fail abort parallel execution
             parallel {
-		stage('DEVA - DB Deployment') {
+		stage('DEVA - DB Delivery') {
 		          environment {
 				FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
 		                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DVA_FLYWAY'
@@ -46,7 +46,7 @@ pipeline {
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 			    }
 		 }
-		 stage('DEVB - DB Deployment') {
+		 stage('DEVB - DB Delivery') {
 		            environment {
 				FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
 		                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DVB_FLYWAY'
@@ -67,7 +67,7 @@ pipeline {
 		        }
 		    }
 		}
-	    stage('Parallel - Stage Deployment') {
+	    stage('Parallel - Stage Delivery') {
             	failFast true // first to fail abort parallel execution
             	parallel {
 			stage('STA - DB Deployment') {
@@ -84,7 +84,7 @@ pipeline {
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
 			    }
 		        }
-		        stage('STB - DB Deployment') {
+		        stage('STB - DB Delivery') {
 		            environment {
 				FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
 		                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/STB_FLYWAY'
