@@ -62,7 +62,7 @@ pipeline {
 		        }
 		    }
 		}
-	  stage('Results') {
+	  stage('Results - Development') {
 		steps {
                  	script {
                     			timeout(time: 1, unit: 'DAYS') {
@@ -106,7 +106,7 @@ pipeline {
 		        }
 		}   
 	}
-	stage('Results') {
+	stage('Results - Staging') {
 		steps {
                  	script {
                     			timeout(time: 1, unit: 'DAYS') {
