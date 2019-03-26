@@ -58,15 +58,20 @@ pipeline {
 		                echo 'Run Flyway Migration'
 				unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
-			    	script {
-                    			timeout(time: 1, unit: 'DAYS') {
-                        			input message: 'Approve deployment?'
-                    			}
-                		}	
 			    }
 		        }
 		    }
 		}
+	  stage('Results') {
+		steps {
+                 	script {
+                    			timeout(time: 1, unit: 'DAYS') {
+                        			input message: 'Approve Delivery on Development?'
+                    			}
+                		}
+		}
+   	   }
+
 	    stage('Parallel - Stage Delivery') {
             	failFast true // first to fail abort parallel execution
             	parallel {
@@ -105,7 +110,7 @@ pipeline {
 		steps {
                  	script {
                     			timeout(time: 1, unit: 'DAYS') {
-                        			input message: 'Approve deployment?'
+                        			input message: 'Approve Delivery on Staging?'
                     			}
                 		}
 		}
