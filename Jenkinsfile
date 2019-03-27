@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
     triggers {
@@ -10,14 +9,14 @@ pipeline {
             steps {
                 echo 'Run Flyway Github'
                 git 'https://github.com/aboussetta/flyway.git'
-		checkout scm
+		        checkout scm
                 stash includes: '*.sql', name: 'db' 
-		sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
+		        sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
             }
         }
         stage('Build - DB Migration') {
             environment {
-		FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
+		        FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
                 FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
                 FLYWAY_USER='flyway'
                 FLYWAY_PASSWORD='flyway_123'
@@ -25,7 +24,7 @@ pipeline {
             }
             steps {
                 echo 'Run Flyway Migration'
-		unstash 'db'
+		        unstash 'db'
                 sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 	    	}
         }
@@ -34,7 +33,7 @@ pipeline {
             parallel {
 		stage('DEVA - DB Delivery') {
 		          environment {
-				FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
+				        FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
 		                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DVA_FLYWAY'
 		                FLYWAY_USER='flyway_deva'
 		                FLYWAY_PASSWORD='flyway_123'
@@ -42,13 +41,13 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-				unstash 'db'
+				        unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 			    }
 		 }
 		 stage('DEVB - DB Delivery') {
 		            environment {
-				FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
+				        FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
 		                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DVB_FLYWAY'
 		                FLYWAY_USER='flyway_devb'
 		                FLYWAY_PASSWORD='flyway_123'
@@ -56,23 +55,42 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-				unstash 'db'
+				        unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
 			    }
 		        }
 		    }
 		}
-	  stage('Results - Development') {
+	    stage('Results - Development') {
 		steps {
                  	script {
                     			timeout(time: 1, unit: 'DAYS') {
-                        			input message: 'Approve Delivery on Development?'
-                    			}
+                        			def userInput = input message: 'Approve Delivery on Development or Rollback?'
+                                }
+                                def userInput = input(
+                                id: 'userInput', message: 'Approve Delivery on Development or Rollback ?', 
+                                parameters: [
+                                [$class: 'TextParameterDefinition', defaultValue: 'None', description: 'Approve Development Delivery', name: 'Commit'],
+                                [$class: 'TextParameterDefinition', defaultValue: 'None', description: 'Undo Development Delivery', name: 'Rollback']
+                                ])
+                                node {
+                                    if (userInput == 'Commit') {
+                                        // do something
+                                        echo "this was successful"
+                                    } else {
+                                        // do something else
+                                        echo "this was not successful"
+                                        currentBuild.result = 'FAILURE'
+                                    } 
+                                }
+                                 
+                                echo ("Approve Development Delivery: "+userInput['Commit'])
+                                echo ("Undo Development Delivery: "+userInput['Rollback'])
                 		}
 		}
    	   }
 
-	    stage('Parallel - Stage Delivery') {
+	stage('Parallel - Stage Delivery') {
             	failFast true // first to fail abort parallel execution
             	parallel {
 			stage('STA - DB Delivery') {
@@ -85,13 +103,13 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-				unstash 'db'
+				        unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
 			    }
 		        }
 		        stage('STB - DB Delivery') {
 		            environment {
-				FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
+				        FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
 		                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/STB_FLYWAY'
 		                FLYWAY_USER='flyway_stb'
 		                FLYWAY_PASSWORD='flyway_123'
@@ -99,7 +117,7 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-				unstash 'db'
+				        unstash 'db'
 		                sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
 			
 			    }
@@ -115,8 +133,30 @@ pipeline {
                 		}
 		}
    	}
-
+    stage('PRODB - DB Deployment') {
+        environment {
+            FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
+            FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/PRD_FLYWAY'
+            FLYWAY_USER='flyway_pro'
+            FLYWAY_PASSWORD='flyway_123'
+            FLYWAY_SCHEMAS='FLYWAY'
+        }
+        steps {
+            echo 'Run Flyway Migration'
+            unstash 'db'
+            sh '/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
+        }
     }
+    stage('Results - Production') {
+		steps {
+                 	script {
+                    			timeout(time: 1, unit: 'DAYS') {
+                        			input message: 'Approve Delivery on Production?'
+                    			}
+                		}
+		}
+   	}
+}
  post {
         always {
             echo 'This will always run'
