@@ -28,17 +28,6 @@ pipeline {
 		        unstash 'db'
                 sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 	    	}
-			post {
-                    failure {
-						echo 'Run Flyway Migration - Status Before Rollback'
-						sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
-						echo 'Run Flyway Migration - Rollback'
-                        sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
-						echo 'Run Flyway Migration - Status After Rollback'
-						sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
-                    }
-                }
-
         }
         stage('Parallel - Dev Delivery') {
             failFast true // first to fail abort parallel execution
@@ -61,16 +50,10 @@ pipeline {
 						FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
 		            }
 		            steps {
-		                echo 'Run Flyway Migration - Rollout'
+		                echo 'Run Flyway Migration'
 				        unstash 'db'
 		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 			    }
-				 post {
-                    failure {
-						echo 'Run Flyway Migration - Rollback'
-                        sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
-                    }
-                }
 		 }
 		 stage('DEVB - DB Delivery') {
 		            environment {
@@ -86,12 +69,6 @@ pipeline {
 				        unstash 'db'
 		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
 			    }
-				post {
-                    failure {
-						echo 'Run Flyway Migration - Rollback'
-                        sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
-                    }
-                }
 		        }
 		    }
 		}
@@ -101,7 +78,25 @@ pipeline {
                     			timeout(time: 1, unit: 'DAYS') {
                         			def userInput = input message: 'Approve Delivery on Development or Rollback?'
                                 }
-
+                                def userInput = input(
+                                id: 'userInput', message: 'Approve Delivery on Development or Rollback ?', 
+                                parameters: [
+                                [$class: 'TextParameterDefinition', defaultValue: 'None', description: 'Approve Development Delivery', name: 'Commit'],
+                                [$class: 'TextParameterDefinition', defaultValue: 'None', description: 'Undo Development Delivery', name: 'Rollback']
+                                ])
+                                node {
+                                    if (userInput == 'Commit') {
+                                        // do something
+                                        echo "this was successful"
+                                    } else {
+                                        // do something else
+                                        echo "this was not successful"
+                                        currentBuild.result = 'FAILURE'
+                                    } 
+                                }
+                                 
+                                echo ("Approve Development Delivery: "+userInput['Commit'])
+                                echo ("Undo Development Delivery: "+userInput['Rollback'])
                 		}
 		}
    	   }
@@ -196,4 +191,3 @@ pipeline {
     }
 
 }
-
