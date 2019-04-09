@@ -33,6 +33,14 @@ pipeline {
             failFast true // first to fail abort parallel execution
             parallel {
 		stage('DEVA - DB Delivery') {
+				input {
+               		message "Should we continue?"
+                	ok "Yes, we should."
+                	submitter "Developer,DBA"
+                	parameters {
+                    string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
+                	}
+            	}				
 		          environment {
 				        FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
 		                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DVA_FLYWAY'
