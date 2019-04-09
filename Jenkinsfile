@@ -25,13 +25,14 @@ pipeline {
             }
             steps {
 		echo 'Run Flyway Migration - Status Before Rollout'
-		sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
+		def ret_flyway_migrate = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info', returnStdout: true)
+		println ret_flyway_migrate
                 echo 'Run Flyway Migration'
 	        unstash 'db'
                 sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 	    	}
 			post {
-                    failure {
+                    	failure {
 						echo 'Run Flyway Migration - Status Before Rollback'
 						sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
 						echo 'Run Flyway Migration - Rollback'
