@@ -1,7 +1,7 @@
 CREATE TABLE admin_emp (
          empno      NUMBER(5) PRIMARY KEY,
          ename      VARCHAR2(15) NOT NULL,
-         ssn        NUMBER(9) ENCRYPT,
+         ssn        NUMBER(9),
          job        VARCHAR2(10),
          mgr        NUMBER(5),
          hiredate   DATE DEFAULT (sysdate),
