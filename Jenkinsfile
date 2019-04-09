@@ -39,6 +39,7 @@ pipeline {
 		post {
                     	failure {
 						echo 'Run Flyway Migration - Status Before Rollback'
+						println(ret_flyway_migrate)
 						sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
 						echo 'Run Flyway Migration - Rollback'
                         sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
