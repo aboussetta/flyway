@@ -31,7 +31,10 @@ pipeline {
 		}
                 echo 'Run Flyway Migration'
 	        unstash 'db'
-                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
+                script{
+                        def ret_flyway_migrate = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate', returnStdout: true)
+                        println(ret_flyway_migrate)
+                }
 	    	}
 		post {
                     	failure {
