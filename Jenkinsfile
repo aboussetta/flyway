@@ -9,9 +9,9 @@ pipeline {
             steps {
                 echo 'Run Flyway Github'
                 git 'https://github.com/aboussetta/flyway.git'
-		        checkout scm
+		checkout scm
                 stash includes: '*.sql', name: 'db' 
-		        sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
+		sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
             }
         }
         stage('Build - DB Migration') {
