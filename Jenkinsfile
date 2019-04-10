@@ -15,6 +15,7 @@ pipeline {
             }
         }
         stage('Build - DB Migration') {
+	    lock(resource: 'build-server', inversePrecedence: true){
             environment {
 		FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
                 FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
@@ -38,48 +39,47 @@ pipeline {
 	    	}
 		post {
                     	failure {
-						echo 'Run Flyway Migration - Status Before Rollback'
-						println(ret_flyway_migrate)
-						sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
-						echo 'Run Flyway Migration - Rollback'
-                        sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
-						echo 'Run Flyway Migration - Status After Rollback'
-						sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
+				echo 'Run Flyway Migration - Status Before Rollback'
+				sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
+				echo 'Run Flyway Migration - Rollback'
+                        	sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
+				echo 'Run Flyway Migration - Status After Rollback'
+				sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
                     }
                 }
-
+	    }
         }
         stage('Parallel - Dev Delivery') {
             failFast true // first to fail abort parallel execution
             parallel {
 		stage('DEVA - DB Delivery') {
-				input {
-               		message "Should we continue?"
-                	ok "Yes, we should."
-                	submitter "Developer,DBA"
-                	parameters {
-                    string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
-                	}
-            	}				
-		          environment {
-				        FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
+			input {
+               			message "Should we continue?"
+                		ok "Yes, we should."
+                		submitter "Developer,DBA"
+                		parameters {
+                    			string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
+                		}
+            		}				
+		        environment {
+				FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
 		                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DVA_FLYWAY'
 		                FLYWAY_USER='flyway_deva'
 		                FLYWAY_PASSWORD='flyway_123'
 		                FLYWAY_SCHEMAS='FLYWAY_DEVA'
-						FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
+				FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
 		            }
 		            steps {
 		                echo 'Run Flyway Migration - Rollout'
-				        unstash 'db'
+				unstash 'db'
 		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 			    }
-				 post {
-                    failure {
-						echo 'Run Flyway Migration - Rollback'
-                        sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
-                    }
-                }
+			post {
+                    		failure {
+					echo 'Run Flyway Migration - Rollback'
+                        		sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
+                    		}
+                	}
 		 }
 		 stage('DEVB - DB Delivery') {
 		            environment {
