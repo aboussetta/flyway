@@ -10,7 +10,6 @@ pipeline {
                 echo 'Run Flyway Github'
                 git 'https://github.com/aboussetta/flyway.git'
 		checkout scm
-                stash includes: '*.sql', name: 'db' 
 		sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
             }
         }
@@ -31,7 +30,6 @@ pipeline {
 			println(ret_flyway_migrate)
 		}
                 echo 'Run Flyway Migration'
-	        unstash 'db'
                 script{
                         def ret_flyway_migrate = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate', returnStdout: true)
                         println(ret_flyway_migrate)
