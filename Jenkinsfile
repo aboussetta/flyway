@@ -22,7 +22,7 @@ pipeline {
                 FLYWAY_PASSWORD='flyway_123'
                 FLYWAY_SCHEMAS='FLYWAY'
 		FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
-		FLYWAY_EDITION=enterprise
+		FLYWAY_EDITION='enterprise'
             }
             steps {
 		echo 'Run Flyway Migration - Status Before Rollout'
