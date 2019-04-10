@@ -21,7 +21,7 @@ pipeline {
                 FLYWAY_USER='flyway'
                 FLYWAY_PASSWORD='flyway_123'
                 FLYWAY_SCHEMAS='FLYWAY'
-		FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
+		FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
             }
             steps {
 		echo 'Run Flyway Migration - Status Before Rollout'
@@ -65,7 +65,7 @@ pipeline {
 		                FLYWAY_USER='flyway_deva'
 		                FLYWAY_PASSWORD='flyway_123'
 		                FLYWAY_SCHEMAS='FLYWAY_DEVA'
-				FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
+				FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
 		            }
 		            steps {
 		                echo 'Run Flyway Migration - Rollout'
@@ -86,7 +86,7 @@ pipeline {
 		                FLYWAY_USER='flyway_devb'
 		                FLYWAY_PASSWORD='flyway_123'
 		                FLYWAY_SCHEMAS='FLYWAY_DEVB'
-						FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
+						FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
@@ -123,7 +123,7 @@ pipeline {
 					FLYWAY_USER='flyway_sta'
 					FLYWAY_PASSWORD='flyway_123'
 					FLYWAY_SCHEMAS='FLYWAY_STA'
-					FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
+					FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
@@ -138,7 +138,7 @@ pipeline {
 		                FLYWAY_USER='flyway_stb'
 		                FLYWAY_PASSWORD='flyway_123'
 		                FLYWAY_SCHEMAS='FLYWAY_STB'
-						FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
+						FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
@@ -165,7 +165,7 @@ pipeline {
             FLYWAY_USER='flyway_pro'
             FLYWAY_PASSWORD='flyway_123'
             FLYWAY_SCHEMAS='FLYWAY'
-			FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
+			FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
         }
         steps {
             echo 'Run Flyway Migration'
