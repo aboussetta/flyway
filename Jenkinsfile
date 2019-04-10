@@ -40,7 +40,10 @@ pipeline {
 				echo 'Run Flyway Migration - Status Before Rollback'
 				sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
 				echo 'Run Flyway Migration - Rollback'
-                        	sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
+                        	script{
+                        		def ret_flyway_undo = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo', returnStdout: true)
+                        		println(ret_flyway_undo)
+                		}		
 				echo 'Run Flyway Migration - Status After Rollback'
 				sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
                     }
