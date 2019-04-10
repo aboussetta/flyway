@@ -15,7 +15,6 @@ pipeline {
             }
         }
         stage('Build - DB Migration') {
-	    lock(resource: 'build-server', inversePrecedence: true){
             environment {
 		FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
                 FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
@@ -47,7 +46,6 @@ pipeline {
 				sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
                     }
                 }
-	    }
         }
         stage('Parallel - Dev Delivery') {
             failFast true // first to fail abort parallel execution
