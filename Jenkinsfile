@@ -59,6 +59,15 @@ pipeline {
 							def undo_script_name = sh(script: "echo V10__add_rahim_table_with_error.sql | sed 's/^./U/'", returnStdout:true).trim()
 					        //def undo_script_name = sh "echo V10__add_rahim_table_with_error.sql | sed 's/^./U/'"
 							println(undo_script_name)
+
+							try {
+								// Run rollback script
+								def ret_undo_script_output = sh(script: "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$SQLPLUS_URL < ./$undo_script_name", returnStdout:true).trim()
+								println(ret_undo_script_output)
+							} catch (Exception ex) {
+								println("Unable to execute undo_script_name: ${ex}")
+							}
+
 							echo 'Run Flyway Migration - Status After Rollback'
 							def ret_flyway_repair = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS repair', returnStdout: true)
 							println(ret_flyway_repair)
