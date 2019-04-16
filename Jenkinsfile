@@ -52,8 +52,9 @@ pipeline {
 
 							echo 'SQLPlusRunner running file script'
 							def ret_undo_script_name = sh "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$FLYWAY_URL < ./retrieve_undo_script_name.sql"
-									def ret_flyway_undo = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo', returnStdout: true)
-									println(ret_flyway_undo)
+							def ret_flyway_undo = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo', returnStdout: true)
+							println(ret_flyway_undo)
+							println(ret_undo_script_name)
 					}
 					echo 'Run Flyway Migration - Status After Rollback'
 					def ret_flyway_repair = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS repair', returnStdout: true)
@@ -73,7 +74,7 @@ pipeline {
             parallel {
 				stage('DEVA - DB Delivery') {
 					input {
-               			mess age "Should we continue?"
+               			message "Should we continue?"
                 		ok "Yes, we should."
                 		submitter "Developer,DBA"
                 		parameters {
