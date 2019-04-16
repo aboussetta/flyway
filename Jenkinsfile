@@ -63,7 +63,7 @@ pipeline {
         }
         }
 		stage('BUILD - Code Approval') {
-			script{
+			steps {
 				echo 'Building..'
         		input(message: 'Do you want to proceed', id: 'yes', ok: 'yes', submitter: "developer,dba", submitterParameter: "developer,dba")
 			}
@@ -73,7 +73,7 @@ pipeline {
             parallel {
 				stage('DEVA - DB Delivery') {
 					input {
-               			message "Should we continue?"
+               			mess age "Should we continue?"
                 		ok "Yes, we should."
                 		submitter "Developer,DBA"
                 		parameters {
