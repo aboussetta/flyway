@@ -39,32 +39,34 @@ pipeline {
 			}
 		post {
             	failure {
-				echo 'Run Flyway Migration - Status Before Rollback'
-				sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
-				echo 'Run Flyway Migration - Rollback'
-                script{
-               			try {
-    						// Fails with non-zero exit if dir1 does not exist
-							def ret_undo_script_name = sh(script: "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$FLYWAY_URL < ./retrieve_undo_script_name.sql", returnStdout:true).trim()
-					 	} catch (Exception ex) {
-    						println("Unable to read undo_script_name: ${ex}")
-					 	}
+					echo 'Run Flyway Migration - Status Before Rollback'
+					sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
+					echo 'Run Flyway Migration - Rollback'
+					script{
+							try {
+								// Fails with non-zero exit if dir1 does not exist
+								def ret_undo_script_name = sh(script: "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$FLYWAY_URL < ./retrieve_undo_script_name.sql", returnStdout:true).trim()
+							} catch (Exception ex) {
+								println("Unable to read undo_script_name: ${ex}")
+							}
 
-					 	echo 'SQLPlusRunner running file script'
-					 	def ret_undo_script_name = sh "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$FLYWAY_URL < ./retrieve_undo_script_name.sql"
-                        		def ret_flyway_undo = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo', returnStdout: true)
-                        		println(ret_flyway_undo)
-                }
-				echo 'Run Flyway Migration - Status After Rollback'
-				def ret_flyway_repair = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS repair', returnStdout: true)
-				println(ret_flyway_repair)
-				sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
+							echo 'SQLPlusRunner running file script'
+							def ret_undo_script_name = sh "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$FLYWAY_URL < ./retrieve_undo_script_name.sql"
+									def ret_flyway_undo = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo', returnStdout: true)
+									println(ret_flyway_undo)
+					}
+					echo 'Run Flyway Migration - Status After Rollback'
+					def ret_flyway_repair = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS repair', returnStdout: true)
+					println(ret_flyway_repair)
+					sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
                 }
         }
         }
 		stage('BUILD - Code Approval') {
-			echo 'Building..'
-        	input(message: 'Do you want to proceed', id: 'yes', ok: 'yes', submitter: "developer,dba", submitterParameter: "developer,dba")
+			script{
+				echo 'Building..'
+        		input(message: 'Do you want to proceed', id: 'yes', ok: 'yes', submitter: "developer,dba", submitterParameter: "developer,dba")
+			}
 		}
         stage('Parallel - Dev Delivery') {
             failFast true // first to fail abort parallel execution
