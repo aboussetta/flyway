@@ -24,6 +24,7 @@ pipeline {
 		            FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
 		            FLYWAY_EDITION='enterprise'
 					SQLPLUS_PATH='/Users/abderrahim.boussetta/instantclient_12_2/'
+					SQLPLUS_URL='//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
             }
             steps {
 				echo 'Run Flyway Migration - Status Before Rollout'
@@ -45,13 +46,13 @@ pipeline {
 					script{
 							try {
 								// Fails with non-zero exit if dir1 does not exist
-								def ret_undo_script_name = sh(script: "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$FLYWAY_URL < ./retrieve_undo_script_name.sql", returnStdout:true).trim()
+								def ret_undo_script_name = sh(script: "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$SQLPLUS_URL < ./retrieve_undo_script_name.sql", returnStdout:true).trim()
 							} catch (Exception ex) {
 								println("Unable to read undo_script_name: ${ex}")
 							}
 
 							echo 'SQLPlusRunner running file script'
-							def ret_undo_script_name = sh "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$FLYWAY_URL < ./retrieve_undo_script_name.sql"
+							def ret_undo_script_name = sh "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$SQLPLUS_URL < ./retrieve_undo_script_name.sql"
 							def ret_flyway_undo = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo', returnStdout: true)
 							println(ret_flyway_undo)
 							println(ret_undo_script_name)
