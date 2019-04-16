@@ -52,11 +52,11 @@ pipeline {
 							}
 
 							echo 'SQLPlusRunner running file script'
-							def ret_undo_script_name = sh "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$SQLPLUS_URL < ./retrieve_undo_script_name.sql"
+							//def ret_undo_script_name = sh "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$SQLPLUS_URL < ./retrieve_undo_script_name.sql"
 							//def ret_flyway_undo = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo', returnStdout: true)
 							//println(ret_flyway_undo)
 							println(ret_undo_script_name)
-					        undo_script_name = sh "echo V10__add_rahim_table_with_error.sql | sed 's/^./U/'"
+					        def undo_script_name = sh "echo V10__add_rahim_table_with_error.sql | sed 's/^./U/'"
 							println(undo_script_name)
 							echo 'Run Flyway Migration - Status After Rollback'
 							def ret_flyway_repair = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS repair', returnStdout: true)
