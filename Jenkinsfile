@@ -3,82 +3,97 @@ pipeline {
     triggers {
         pollSCM('* * * * *')
     }
-   
+
     stages {
         stage('Checkout') {
             steps {
                 echo 'Run Flyway Github'
                 git 'https://github.com/aboussetta/flyway.git'
-		checkout scm
-		sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
+				checkout scm
+				sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
             }
         }
+
         stage('Build - DB Migration') {
             environment {
-		FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
-                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
-                FLYWAY_USER='flyway'
-                FLYWAY_PASSWORD='flyway_123'
-                FLYWAY_SCHEMAS='FLYWAY'
-		FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
-		FLYWAY_EDITION='enterprise'
+		            FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
+                	FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
+                	FLYWAY_USER='flyway'
+                	FLYWAY_PASSWORD='flyway_123'
+                	FLYWAY_SCHEMAS='FLYWAY'
+		            FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
+		            FLYWAY_EDITION='enterprise'
+					SQLPLUS_PATH='/Users/abderrahim.boussetta/instantclient_12_2/'
             }
             steps {
-		echo 'Run Flyway Migration - Status Before Rollout'
-		script{
-			def ret_flyway_migrate = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info', returnStdout: true)
-			println(ret_flyway_migrate)
-		}
-                echo 'Run Flyway Migration'
-                script{
-                        def ret_flyway_migrate = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate', returnStdout: true)
-                        println(ret_flyway_migrate)
-                }
-	    	}
+				echo 'Run Flyway Migration - Status Before Rollout'
+				script{
+					def ret_flyway_migrate = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info', returnStdout: true)
+					println(ret_flyway_migrate)
+				}
+				echo 'Run Flyway Migration'
+				script{
+						def ret_flyway_migrate = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate', returnStdout: true)
+						println(ret_flyway_migrate)
+				}
+			}
 		post {
-                    	failure {
+            	failure {
 				echo 'Run Flyway Migration - Status Before Rollback'
 				sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
 				echo 'Run Flyway Migration - Rollback'
-                        	script{
-					def ret_flyway_repair = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS repair', returnStdout: true)
-					println(ret_flyway_repair)
+                script{
+               			try {
+    						// Fails with non-zero exit if dir1 does not exist
+							def ret_undo_script_name = sh(script: "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$FLYWAY_URL < ./retrieve_undo_script_name.sql", returnStdout:true).trim()
+					 	} catch (Exception ex) {
+    						println("Unable to read undo_script_name: ${ex}")
+					 	}
+
+					 	echo 'SQLPlusRunner running file script'
+					 	def ret_undo_script_name = sh "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$FLYWAY_URL < ./retrieve_undo_script_name.sql"
                         		def ret_flyway_undo = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo', returnStdout: true)
                         		println(ret_flyway_undo)
-                		}		
+                }
 				echo 'Run Flyway Migration - Status After Rollback'
+				def ret_flyway_repair = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS repair', returnStdout: true)
+				println(ret_flyway_repair)
 				sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
-                    }
                 }
         }
+        }
+		stage('BUILD - Code Approval') {
+			echo 'Building..'
+        	input(message: 'Do you want to proceed', id: 'yes', ok: 'yes', submitter: "developer,dba", submitterParameter: "developer,dba")
+		}
         stage('Parallel - Dev Delivery') {
             failFast true // first to fail abort parallel execution
             parallel {
-		stage('DEVA - DB Delivery') {
-			input {
+				stage('DEVA - DB Delivery') {
+					input {
                			message "Should we continue?"
                 		ok "Yes, we should."
                 		submitter "Developer,DBA"
                 		parameters {
                     			string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
                 		}
-            		}				
-		        environment {
-				FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
+            		}
+		        	environment {
+						FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
 		                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DVA_FLYWAY'
 		                FLYWAY_USER='flyway_deva'
 		                FLYWAY_PASSWORD='flyway_123'
 		                FLYWAY_SCHEMAS='FLYWAY_DEVA'
-				FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
+						FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
 		            }
 		            steps {
 		                echo 'Run Flyway Migration - Rollout'
-				unstash 'db'
+						unstash 'db'
 		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
-			    }
-			post {
-                    		failure {
-					echo 'Run Flyway Migration - Rollback'
+			    	}
+				post {
+                    failure {
+								echo 'Run Flyway Migration - Rollback'
                         		sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
                     		}
                 	}
@@ -95,7 +110,7 @@ pipeline {
 		            steps {
 		                echo 'Run Flyway Migration'
 				        unstash 'db'
-		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
+		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 			    }
 				post {
                     failure {
@@ -132,7 +147,7 @@ pipeline {
 		            steps {
 		                echo 'Run Flyway Migration'
 				        unstash 'db'
-		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
+		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 			    }
 		        }
 		        stage('STB - DB Delivery') {
@@ -147,11 +162,11 @@ pipeline {
 		            steps {
 		                echo 'Run Flyway Migration'
 				        unstash 'db'
-		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
-			
+		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
+
 			    }
 		        }
-		}   
+		}
 	}
 	stage('Results - Staging') {
 		steps {
