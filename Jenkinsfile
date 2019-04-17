@@ -29,10 +29,10 @@ pipeline {
 
 				//stage "Archive build output"
 				script{
-					final changeSet = build.getChangeSet()
-					final changeSetIterator = changeSet.iterator()
+					def changeSet = build.getChangeSet()
+					def changeSetIterator = changeSet.iterator()
 					while (changeSetIterator.hasNext()) {
-						final gitChangeSet = changeSetIterator.next()
+						def gitChangeSet = changeSetIterator.next()
 						for (final path : gitChangeSet.getPaths()) {
 							println path.getPath()
 						}
