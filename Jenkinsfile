@@ -29,25 +29,27 @@ pipeline {
 				//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
 
 				//stage "Archive build output"
-				//def changeLogSets = currentBuild.changeSets
-				//for (int i = 0; i < changeLogSets.size(); i++) {
-				//	def entries = changeLogSets[i].items
-				//	for (int j = 0; j < entries.length; j++) {
-				//		def entry = entries[j]
-				//		echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
-				//		def files = new ArrayList(entry.affectedFiles)
-				//		for (int k = 0; k < files.size(); k++) {
-				//			def file = files[k]
-				//			echo "  ${file.editType.name} ${file.path}"
-				//		}
-				//	}
-				//}
+				script{
+					def changeLogSets = currentBuild.changeSets
+					for (int i = 0; i < changeLogSets.size(); i++) {
+						def entries = changeLogSets[i].items
+						for (int j = 0; j < entries.length; j++) {
+							def entry = entries[j]
+							echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
+							def files = new ArrayList(entry.affectedFiles)
+							for (int k = 0; k < files.size(); k++) {
+								def file = files[k]
+								echo "  ${file.editType.name} ${file.path}"
+							}
+						}
+					}
+				}
 
 
 				// Archive the build output artifacts.
 				unstash 'db'
 				archiveArtifacts artifacts: '*.sql', fingerprint: true
-				timeout(time: deployToTestTimeout, unit: 'DAYS') {
+				timeout(time: 5, unit: 'DAYS') {
           			notifyAwaitApproval approvers: getApprovers(testApproverRole),
                               message: "Press OK to initiate TEST deployment?",
                               emailPrompt: "Build ${currentBuild.description} is ready to deploy to TEST."
