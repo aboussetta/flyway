@@ -50,7 +50,7 @@ pipeline {
 				unstash 'db'
 				archiveArtifacts artifacts: '*.sql', fingerprint: true
 				timeout(time: 5, unit: 'DAYS') {
-          			notifyAwaitApproval approvers: getApprovers(testApproverRole),
+          			notifyAwaitApproval approvers: getApprovers(developer),
                               message: "Press OK to initiate TEST deployment?",
                               emailPrompt: "Build ${currentBuild.description} is ready to deploy to TEST."
         		}
