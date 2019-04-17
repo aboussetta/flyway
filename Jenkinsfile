@@ -9,9 +9,11 @@ pipeline {
             steps {
                 echo 'Run Flyway Github'
                 git 'https://github.com/aboussetta/flyway.git'
+				println(currentBuild.changeSets) 
 				checkout scm
 				sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
 				stash includes: '*.sql', name: 'db'
+				println(currentBuild.changeSets) 
             }
         }
         stage('Create Build Outputs Artifacts') {
