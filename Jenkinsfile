@@ -97,7 +97,7 @@ pipeline {
 		stage('BUILD - Code Approval') {
 			steps {
 				echo 'Building..'
-        		input(message: 'Do you want to proceed', id: 'yes', ok: 'yes', submitter: "developer,dba", submitterParameter: "developer,dba")
+        		input(message: 'Do you want to proceed', id: 'yes', ok: 'yes', submitter: "developer", submitterParameter: "developer")
 			}
 		}
         stage('Parallel - Dev Delivery') {
