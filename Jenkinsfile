@@ -11,7 +11,7 @@ pipeline {
                 git 'https://github.com/aboussetta/flyway.git'
 				checkout scm
 				sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
-				archiveArtifacts artifacts: '**', fingerprint: true
+				stash includes: '*.sql', name: 'db'
             }
         }
         stage('Create Build Outputs Artifacts') {
@@ -28,6 +28,7 @@ pipeline {
 				//stage "Archive build output"
 				
 				// Archive the build output artifacts.
+				unstash 'db'
 				archiveArtifacts artifacts: '*.sql', fingerprint: true
             }
         }
