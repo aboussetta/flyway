@@ -26,15 +26,16 @@ pipeline {
 				//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
 
 				//stage "Archive build output"
-				final changeSet = build.getChangeSet()
-				final changeSetIterator = changeSet.iterator()
-				while (changeSetIterator.hasNext()) {
-					final gitChangeSet = changeSetIterator.next()
-					for (final path : gitChangeSet.getPaths()) {
-						println path.getPath()
+				script{
+					final changeSet = build.getChangeSet()
+					final changeSetIterator = changeSet.iterator()
+					while (changeSetIterator.hasNext()) {
+						final gitChangeSet = changeSetIterator.next()
+						for (final path : gitChangeSet.getPaths()) {
+							println path.getPath()
+						}
 					}
 				}
-
 				// Archive the build output artifacts.
 				unstash 'db'
 				archiveArtifacts artifacts: '*.sql', fingerprint: true
