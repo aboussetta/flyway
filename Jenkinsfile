@@ -14,6 +14,7 @@ pipeline {
 				sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
 				stash includes: '*.sql', name: 'db'
 				println(currentBuild.changeSets) 
+				println(currentBuild.changeSets.items)
             }
         }
         stage('Create Build Outputs Artifacts') {
@@ -28,19 +29,19 @@ pipeline {
 				//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
 
 				//stage "Archive build output"
-				def changeLogSets = currentBuild.changeSets
-				for (int i = 0; i < changeLogSets.size(); i++) {
-					def entries = changeLogSets[i].items
-					for (int j = 0; j < entries.length; j++) {
-						def entry = entries[j]
-						echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
-						def files = new ArrayList(entry.affectedFiles)
-						for (int k = 0; k < files.size(); k++) {
-							def file = files[k]
-							echo "  ${file.editType.name} ${file.path}"
-						}
-					}
-				}
+				//def changeLogSets = currentBuild.changeSets
+				//for (int i = 0; i < changeLogSets.size(); i++) {
+				//	def entries = changeLogSets[i].items
+				//	for (int j = 0; j < entries.length; j++) {
+				//		def entry = entries[j]
+				//		echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
+				//		def files = new ArrayList(entry.affectedFiles)
+				//		for (int k = 0; k < files.size(); k++) {
+				//			def file = files[k]
+				//			echo "  ${file.editType.name} ${file.path}"
+				//		}
+				//	}
+				//}
 
 
 				// Archive the build output artifacts.
