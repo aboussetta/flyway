@@ -11,9 +11,26 @@ pipeline {
                 git 'https://github.com/aboussetta/flyway.git'
 				checkout scm
 				sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
+				archiveArtifacts artifacts: '**', fingerprint: true
             }
         }
+        stage('Create Build Outputs Artifacts') {
+            steps {
+				// Make the output directory.
+				//sh "mkdir -p output"
 
+				// Write an useful file, which is needed to be archived.
+				//writeFile file: "output/usefulfile.txt", text: "This file is useful, need to archive it."
+
+				// Write an useless file, which is not needed to be archived.
+				//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
+
+				//stage "Archive build output"
+				
+				// Archive the build output artifacts.
+				archiveArtifacts artifacts: '*.sql', fingerprint: true
+            }
+        }
         stage('Build - DB Migration') {
             environment {
 		            FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
