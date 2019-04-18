@@ -28,7 +28,7 @@ pipeline {
 				// Write an useless file, which is not needed to be archived.
 				//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
 
-				//stage "Archive build output"
+				echo "Gathering SCM changes"
 				script{
 					def changeLogSets = currentBuild.changeSets
 					for (int i = 0; i < changeLogSets.size(); i++) {
@@ -153,10 +153,45 @@ pipeline {
 			    	}
 				post {
                     failure {
-								echo 'Run Flyway Migration - Rollback'
-                        		sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
-                    		}
-                	}
+						echo 'Run Flyway Migration - Rollback'
+                        sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo'
+
+						echo 'Run Flyway Migration - Status Before Rollback'
+						sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
+						echo 'Run Flyway Migration - Rollback'
+						script{
+							try {
+								// Fails with non-zero exit if dir1 does not exist
+								def ret_undo_script_name = sh(script: "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$SQLPLUS_URL < ./retrieve_undo_script_name.sql", returnStdout:true).trim()
+								println(ret_undo_script_name)
+							} catch (Exception ex) {
+								println("Unable to read undo_script_name: ${ex}")
+							}
+
+							echo 'SQLPlusRunner running file script'
+							//def ret_undo_script_name = sh "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$SQLPLUS_URL < ./retrieve_undo_script_name.sql"
+							//def ret_flyway_undo = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo', returnStdout: true)
+							//println(ret_flyway_undo)
+							def undo_script_name = sh(script: "echo V10__add_rahim_table_with_error.sql | sed 's/^./U/'", returnStdout:true).trim()
+					        //def undo_script_name = sh "echo V10__add_rahim_table_with_error.sql | sed 's/^./U/'"
+							println(undo_script_name)
+
+							try {
+								// Run rollback script
+								def ret_undo_script_output = sh(script: "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$SQLPLUS_URL < ./$undo_script_name", returnStdout:true).trim()
+								println(ret_undo_script_output)
+							} catch (Exception ex) {
+								println("Unable to execute undo_script_name: ${ex}")
+							}
+
+							echo 'Run Flyway Migration - Status After Rollback'
+							def ret_flyway_repair = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS repair', returnStdout: true)
+							println(ret_flyway_repair)
+							sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
+                		}	
+
+                    }
+                }
 		 }
 		 stage('DEVB - DB Delivery') {
 		            environment {
@@ -283,3 +318,59 @@ pipeline {
 
 }
 
+def developmentArtifactVersion = ''
+def releasedVersion = ''
+// get change log to be send over the mail
+@NonCPS
+def getChangeString() {
+    MAX_MSG_LEN = 100
+    def changeString = ""
+
+    echo "Gathering SCM changes"
+    def changeLogSets = currentBuild.changeSets
+    for (int i = 0; i < changeLogSets.size(); i++) {
+        def entries = changeLogSets[i].items
+        for (int j = 0; j < entries.length; j++) {
+            def entry = entries[j]
+            truncated_msg = entry.msg.take(MAX_MSG_LEN)
+            changeString += " - ${truncated_msg} [${entry.author}]\n"
+        }
+    }
+
+    if (!changeString) {
+        changeString = " - No new changes"
+    }
+    return changeString
+}
+
+def sendEmail(status) {
+    mail(
+            to: "$EMAIL_RECIPIENTS",
+            subject: "Build $BUILD_NUMBER - " + status + " (${currentBuild.fullDisplayName})",
+            body: "Changes:\n " + getChangeString() + "\n\n Check console output at: $BUILD_URL/console" + "\n")
+}
+
+def getDevVersion() {
+    def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    def versionNumber;
+    if (gitCommit == null) {
+        versionNumber = env.BUILD_NUMBER;
+    } else {
+        versionNumber = gitCommit.take(8);
+    }
+    print 'build  versions...'
+    print versionNumber
+    return versionNumber
+}
+
+def getReleaseVersion() {
+    def pom = readMavenPom file: 'pom.xml'
+    def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    def versionNumber;
+    if (gitCommit == null) {
+        versionNumber = env.BUILD_NUMBER;
+    } else {
+        versionNumber = gitCommit.take(8);
+    }
+    return pom.version.replace("-SNAPSHOT", ".${versionNumber}")
+}
