@@ -29,16 +29,8 @@ pipeline {
 				// Write an useless file, which is not needed to be archived.
 				//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
 				// 
-				cucumber buildStatus: 'UNSTABLE',
-                fileIncludePattern: '**/*.json',
-                trendsLimit: 10,
-                classifications: [
-                    [
-                        'key': 'Browser',
-                        'value': 'Firefox'
-                    ]
-                ]
-
+				cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
+				
 				echo "Gathering SCM changes"
 				script{
 					def changeLogSets = currentBuild.changeSets
