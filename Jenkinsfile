@@ -18,15 +18,6 @@ pipeline {
             }
         }
         stage('Create Build Outputs Artifacts') {
-			cucumber buildStatus: 'UNSTABLE',
-                fileIncludePattern: '**/*.json',
-                trendsLimit: 10,
-                classifications: [
-                    [
-                        'key': 'Browser',
-                        'value': 'Firefox'
-                    ]
-                ]
 
             steps {
 				// Make the output directory.
@@ -38,6 +29,15 @@ pipeline {
 				// Write an useless file, which is not needed to be archived.
 				//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
 				// 
+				cucumber buildStatus: 'UNSTABLE',
+                fileIncludePattern: '**/*.json',
+                trendsLimit: 10,
+                classifications: [
+                    [
+                        'key': 'Browser',
+                        'value': 'Firefox'
+                    ]
+                ]
 
 				echo "Gathering SCM changes"
 				script{
