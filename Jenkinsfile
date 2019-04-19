@@ -26,7 +26,7 @@ pipeline {
 				println(currentBuild.changeSets.items)
             }
         }
-        stage('Create Build Outputs Artifacts') {
+        stage('Create Build Cucumber Reporting') {
 			steps {
                 cucumber buildStatus: "UNSTABLE",
                     fileIncludePattern: "**/cucumber.json",
@@ -45,7 +45,8 @@ pipeline {
 					undefinedFails: false])
 
  */            }
-
+		}
+        stage('Create Build Outputs Artifacts') {
             steps {
 				// Make the output directory.
 				//sh "mkdir -p output"
