@@ -28,9 +28,9 @@ pipeline {
         }
         stage('Create Build Cucumber Reporting') {
 			steps {
-                cucumber buildStatus: "UNSTABLE",
-                    fileIncludePattern: "**/cucumber.json",
-                    jsonReportDirectory: 'target'
+                //cucumber buildStatus: "UNSTABLE",
+                  //  fileIncludePattern: "**/cucumber.json",
+                    //jsonReportDirectory: 'target'
 			//cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
 /* 			        step([$class: 'CucumberReportPublisher',
 					fileExcludePattern: '',
@@ -47,6 +47,7 @@ pipeline {
  */            }
 		}
         stage('Create Build Outputs Artifacts') {
+			echo "Cucumber Reporting"
             steps {
 				// Make the output directory.
 				//sh "mkdir -p output"
