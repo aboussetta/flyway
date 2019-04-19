@@ -924,3 +924,127 @@ https://github.com/jenkinsci/cucumber-reports-plugin
 
 
 https://developer.oracle.com/containers/automatic-code-deployment
+
+
+
+
+
+
+
+##########  AMAZING ############
+
+https://www.juvo.be/blog/pipeline-builds-devops-environment
+
+pipeline {
+  agent any
+  parameters {
+    booleanParam(name: 'DEPLOYS', defaultValue: false, description: 'Use this build for deployment.')
+ }
+  triggers {
+    pollSCM('H/10 * * * * ')
+  }
+  environment {
+    JAVA_HOME="${tool 'Java8'}"
+    PATH="${env.JAVA_HOME}/bin:${env.PATH}"
+  }
+  tools {
+    maven "Maven3"
+    jdk "Java8"
+  }
+  stages {
+  }
+}
+Script your stages
+Our build and release process consists out of multiple stages. Each stage has a unique name and steps that must be performed. A step can be for example:
+
+Checkout your code
+Run a shell command
+Send a Hipchat message
+Wait for user input
+...
+The prepare stage checks out our SCM code
+
+stage('Prepare') {
+      steps {
+        checkout scm
+      }
+    }
+, while the build stage performs a maven build.
+
+  stage('Build') {
+      steps {
+        sh "mvn -T 4 -P theme clean install"
+      }
+    }
+
+
+Only in case of a successful deployment on the test environment a deployment on the acceptance environment can be done. The same is the case for production: only a successful deployment on acceptance can lead to a deployment on production.
+
+stage('Approve deployment on UAT') {
+      when {
+        environment name: 'DEPLOY_TST', value: "true"
+      }
+      steps {
+        timeout(time: 7, unit: 'DAYS') {
+          script {
+           env.DEPLOY_UAT = input message: 'Approve deployment', parameters: [
+              [$class: 'BooleanParameterDefinition', defaultValue: false, description: '', name: 'Approve deployment on UAT']
+            ]
+          }
+        }
+      }
+    }
+
+  https://nvie.com/posts/a-successful-git-branching-model/
+
+      stage('Approve deployment on PRD') {
+      when {
+        branch 'master'
+        environment name: 'DEPLOY_TST', value: "true"
+        environment name: 'DEPLOY_UAT', value: "true"
+      }
+      steps {
+        timeout(time: 14, unit: 'DAYS') {
+          script {
+           env.DEPLOY_PRD = input message: 'Approve deployment', parameters: [
+              [$class: 'BooleanParameterDefinition', defaultValue: false, description: '', name: 'Approve deployment on PRD']
+            ]
+          }
+        }
+      }
+    }
+
+
+
+
+
+In the end, if everything went well and you manually triggered the build, you want to deploy your code on the test environment. In this case the user was asked if he wanted to use the build for a deployment. If he said yes, the steps of the approval stage are executed and the user is asked to approve the deployment to the test environment. He has one hour to react on the question: if he hasn’t approved the deployment in time, the build process is ended.
+
+  stage('Approve deployment on TST') {
+      when {
+        expression { return params.DEPLOYS }
+      }
+      steps {
+        timeout(time: 1, unit: 'HOURS') {
+          script {
+            env.DEPLOY_TST = input message: 'Approve deployment', parameters: [
+              [$class: 'BooleanParameterDefinition', defaultValue: false, description: '', name: 'Approve deployment on TST']
+            ]
+          }
+        }
+      }
+    }
+When the deployment was approved, the build steps can be executed.
+
+stage('Deploy on TST') {
+      when {
+        environment name: 'DEPLOY_TST', value: "true"
+      }
+      steps {
+        …
+      }
+    }
+
+
+https://www.baeldung.com/jenkins-pipelines
+https://github.com/eugenp/tutorials/blob/master/spring-jenkins-pipeline/scripted-pipeline-unix-nonunix
