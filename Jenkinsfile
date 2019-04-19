@@ -3,6 +3,10 @@ pipeline {
     triggers {
         pollSCM('* * * * *')
     }
+	logRotator {
+  		//Remove logs after two days
+  		daysToKeep(2)
+	}
 
     stages {
         stage('Checkout') {
@@ -18,7 +22,13 @@ pipeline {
             }
         }
         stage('Create Build Outputs Artifacts') {
-
+			steps {
+                cucumber buildStatus: "UNSTABLE",
+                    fileIncludePattern: "**/cucumber.json",
+                    jsonReportDirectory: 'target'
+				//cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
+            }
+	
             steps {
 				// Make the output directory.
 				//sh "mkdir -p output"
@@ -30,7 +40,8 @@ pipeline {
 				//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
 				// 
 				cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
-				
+	
+
 				echo "Gathering SCM changes"
 				script{
 					def changeLogSets = currentBuild.changeSets
