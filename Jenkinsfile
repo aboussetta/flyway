@@ -3,10 +3,10 @@ pipeline {
     triggers {
         pollSCM('* * * * *')
     }
-	logRotator {
+	//logRotator {
   		//Remove logs after two days
-  		daysToKeep(2)
-	}
+  		//daysToKeep(2)
+	//}
 	  // using the Timestamper plugin we can add timestamps to the console log
   	options {
     	timestamps()
