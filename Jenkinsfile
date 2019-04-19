@@ -47,8 +47,8 @@ pipeline {
  */            }
 		}
         stage('Create Build Outputs Artifacts') {
-			echo "Cucumber Reporting"
             steps {
+				echo "Cucumber Reporting"
 				// Make the output directory.
 				//sh "mkdir -p output"
 
