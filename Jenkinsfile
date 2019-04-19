@@ -3,14 +3,14 @@ pipeline {
     triggers {
         pollSCM('* * * * *')
     }
-	logRotator {
-  		Remove logs after two days
-  		daysToKeep(2)
-	}
+	//logRotator {
+  	//	Remove logs after two days
+  	//	daysToKeep(2)
+	//}
 	// using the Timestamper plugin we can add timestamps to the console log
-  	options {
-    	timestamps()
-  	}
+  	//options {
+    //	timestamps()
+  	//}
 	//https://github.com/jenkinsci/pipeline-examples/tree/master/declarative-examples/simple-examples
     stages {
         stage('Checkout') {
@@ -30,7 +30,7 @@ pipeline {
                 cucumber buildStatus: "UNSTABLE",
                     fileIncludePattern: "**/cucumber.json",
                     jsonReportDirectory: 'target'
-					
+
 			//cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
 /* 			        step([$class: 'CucumberReportPublisher',
 					fileExcludePattern: '',
