@@ -8,10 +8,9 @@ pipeline {
   		//daysToKeep(2)
 	//}
 	  // using the Timestamper plugin we can add timestamps to the console log
-  	options {
-    	timestamps()
-  	}
-
+  	//options {
+    //	timestamps()
+  	//}
 	//https://github.com/jenkinsci/pipeline-examples/tree/master/declarative-examples/simple-examples
     stages {
         stage('Checkout') {
