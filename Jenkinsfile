@@ -32,7 +32,7 @@ pipeline {
                     fileIncludePattern: "**/cucumber.json",
                     jsonReportDirectory: 'target'
 			//cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
-			        step([$class: 'CucumberReportPublisher',
+/* 			        step([$class: 'CucumberReportPublisher',
 					fileExcludePattern: '',
 					fileIncludePattern: '',
 					ignoreFailedTests: false,
@@ -44,7 +44,7 @@ pipeline {
 					skippedFails: false,
 					undefinedFails: false])
 
-            }
+ */            }
 
             steps {
 				// Make the output directory.
