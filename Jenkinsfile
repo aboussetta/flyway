@@ -62,7 +62,7 @@ pipeline {
                                 		}
 										stage("Checkout ${repo}") {
             								steps {
-                								echo 'Run Flyway Github'
+                								echo "Run Flyway Github"
                 								git 'https://github.com/aboussetta/${repo}.git'
 												println(currentBuild.changeSets) 
 												checkout scm
@@ -92,7 +92,7 @@ pipeline {
 												//cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
 												echo "Gathering SCM SQL changes Pipelines"
 												script{
-													ef parallelSQLs = [:]
+													def parallelSQLs = [:]
 													def changeLogSets = currentBuild.changeSets
 													for (int i = 0; i < changeLogSets.size(); i++) {
 														def entries = changeLogSets[i].items
@@ -395,7 +395,7 @@ pipeline {
 	}
 	post {
         always {
-            echo 'DEPLOYMENT SUCCEEDED'
+            echo 'COMPLETED'
         }
         success {
             echo 'DEPLOYMENT SUCCEEDED'
