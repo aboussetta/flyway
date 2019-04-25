@@ -61,9 +61,9 @@ pipeline {
 											}
                                 		}
 										stage("Checkout ${repo}") {
-            								steps {
+            								//steps {
                 								echo "Run Flyway Github"
-												println("git  - ${repo}")
+												println("git - ${repo}")
                 								git "https://github.com/aboussetta/${repo}.git"
 												println(currentBuild.changeSets) 
 												checkout scm
@@ -71,7 +71,7 @@ pipeline {
 												stash includes: '*.sql', name: 'db'
 												println(currentBuild.changeSets) 
 												println(currentBuild.changeSets.items)
-            								}
+            								//}
         								}
         								//stage('Create Build Cucumber Reporting') {
 										//	steps {
@@ -80,7 +80,7 @@ pipeline {
                     					//			jsonReportDirectory: 'target'
 										//	}
 										//}
-        								stage('Create Build Outputs Artifacts Pipelines') {
+        								stage('Create Build Pipelines') {
             								steps {
 												echo "Cucumber Reporting"
 												// Make the output directory.
