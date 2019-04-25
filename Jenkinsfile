@@ -50,8 +50,8 @@ pipeline {
 						script{
 							def parallelRepos = [:]
 							def listRepositories = ["flyway", "repo01", "repo02", "repo03"]
-							for (int i = 0; i < listRepositories.size(); i++) {
-								def repo = listRepositories[i]
+							for (int r = 0; r < listRepositories.size(); r++) {
+								def repo = listRepositories[r]
 								println(repo)
 								parallelRepos["${repo}"] = {
                             		node {
