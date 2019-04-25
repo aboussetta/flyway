@@ -56,9 +56,9 @@ pipeline {
 								parallelRepos["${repo}"] = {
                             		node {
                                 		stage("${repo}") {
-											steps{
+											//steps{
 												println("stage - before checkout ${repo}")
-											}
+											//}
                                 		}
 										stage("Checkout ${repo}") {
             								//steps {
@@ -81,7 +81,7 @@ pipeline {
 										//	}
 										//}
         								stage('Create Build Pipelines') {
-            								steps {
+            								//steps {
 												echo "Cucumber Reporting"
 												// Make the output directory.
 												//sh "mkdir -p output"
@@ -382,7 +382,7 @@ pipeline {
 															message: "Press OK to initiate BUILD ?",
 															emailPrompt: "Build ${currentBuild.description} is ready to BUILD."
 												}
-											}
+											//}
 										}	
 									}
 								}
