@@ -64,9 +64,15 @@ pipeline {
             								//steps {
                 								echo "Run Flyway Github"
 												println("git - ${repo}")
-                								git "https://github.com/aboussetta/${repo}.git"
-												println(currentBuild.changeSets) 
-												checkout scm
+												dir('${repo}') {
+    												checkout scm
+												}
+                								// git "https://github.com/aboussetta/${repo}.git"
+												println(currentBuild.changeSets)
+												dir('${repo}') {
+    												checkout scm
+												}
+												// checkout scm
 												sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}'
 												stash includes: '*.sql', name: 'db'
 												println(currentBuild.changeSets) 
