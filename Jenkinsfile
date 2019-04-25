@@ -49,7 +49,7 @@ pipeline {
     	        	steps {
 						script{
 							def parallelRepos = [:]
-							def listRepositories = ["flyway", "repo01", "repo02", "repo03"]
+							def listRepositories = ["flyway", "repo-01", "repo-02", "repo-03"]
 							for (int r = 0; r < listRepositories.size(); r++) {
 								def repo = listRepositories[r]
 								println(repo)
@@ -70,13 +70,13 @@ pipeline {
 												println(currentBuild.changeSets.items)
             								}
         								}
-        								stage('Create Build Cucumber Reporting') {
-											steps {
-                								cucumber buildStatus: "UNSTABLE",
-                    								fileIncludePattern: "**/cucumber.json",
-                    								jsonReportDirectory: 'target'
-											}
-										}
+        								//stage('Create Build Cucumber Reporting') {
+										//	steps {
+                						//		cucumber buildStatus: "UNSTABLE",
+                    					//			fileIncludePattern: "**/cucumber.json",
+                    					//			jsonReportDirectory: 'target'
+										//	}
+										//}
         								stage('Create Build Outputs Artifacts Pipelines') {
             								steps {
 												echo "Cucumber Reporting"
