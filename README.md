@@ -1048,3 +1048,49 @@ stage('Deploy on TST') {
 
 https://www.baeldung.com/jenkins-pipelines
 https://github.com/eugenp/tutorials/blob/master/spring-jenkins-pipeline/scripted-pipeline-unix-nonunix
+
+https://engineering.medallia.com/blog/posts/parallelizing-jenkins-pipelines/
+
+https://github.com/jenkinsci/pipeline-examples/blob/master/pipeline-examples/timestamper-wrapper/timestamperWrapper.groovy
+
+
+// This shows a simple build wrapper example, using the Timestamper plugin.
+node {
+    // Adds timestamps to the output logged by steps inside the wrapper.
+    timestamps {
+        // Just some echoes to show the timestamps.
+        stage "First echo"
+        echo "Hey, look, I'm echoing with a timestamp!"
+
+        // A sleep to make sure we actually get a real difference!
+        stage "Sleeping"
+        sleep 30
+
+        // And a final echo to show the time when we wrap up.
+        stage "Second echo"
+        echo "Wonder what time it is now?"
+    }
+}
+
+
+
+GIT_REPOS=`curl -s curl https://${GITHUB_BASE_URL}/api/v3/orgs/${ORG_NAME}/repos?access_token=${ACCESS_TOKEN} | grep ssh_url | awk -F': ' '{print $2}' | sed -e 's/",//g' | sed -e 's/"//g'`
+for REPO in $GIT_REPOS; do
+  git clone $REPO
+done
+
+
+
+user="https://github.com/user/"
+declare -a arr=("repo1", "repo2")
+for i in "${arr[@]}"
+do
+   echo $user"$i"
+   git clone $user"$i"
+done 
+
+
+NUM_REPOS=1000
+DW_FOLDER="Github_${NUM_REPOS}_repos"
+cd ${DW_FOLDER}
+for REPO in $(curl https://api.github.com/users/${GITHUB_USER}/repos?per_page=${NUM_REPOS} | awk '/ssh_url/{print $2}' | sed 's/^"//g' | sed 's/",$//g') ; do git clone ${REPO} ; done

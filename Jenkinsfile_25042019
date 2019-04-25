@@ -10,6 +10,107 @@
 // still transform a list into a set of actual build steps to be executed in
 // parallel.
 
+// Our initial list of strings we want to echo in parallel
+def listRepositories = ["repo01", "repo02", "repo03", "repo04"]
+
+
+// Take the string and echo it.
+def getEnvironment(inputString) {
+    // We need to wrap what we return in a Groovy closure, or else it's invoked
+    // when this method is called, not when we pass it to parallel.
+    // To do this, you need to wrap the code below in { }, and either return
+    // that explicitly, or use { -> } syntax.
+    return {
+        node {
+            echo inputString
+        }
+    }
+}
+
+
+    node {
+        label 'my-defined-label'
+        customWorkspace '/some/other/path'
+    }
+
+
+
+// The map we'll store the parallel steps in before executing them.
+def stepsForParallel = stringsToEcho.collectEntries {
+    ["echoing ${it}" : transformIntoStep(it)]
+}
+
+// Actually run the steps in parallel - parallel takes a map as an argument,
+// hence the above.
+parallel stepsForParallel
+
+// Take the string and echo it.
+def transformIntoStep(inputString) {
+    // We need to wrap what we return in a Groovy closure, or else it's invoked
+    // when this method is called, not when we pass it to parallel.
+    // To do this, you need to wrap the code below in { }, and either return
+    // that explicitly, or use { -> } syntax.
+    return {
+        node {
+            echo inputString
+        }
+    }
+}
+
+pipeline {
+    agent any
+    parameters {
+        string(name: 'Greeting', defaultValue: 'Hello', description: 'How should I greet the world?')
+    }
+    stages {
+        stage('Example') {
+            steps {
+                echo "${params.Greeting} World!"
+            }
+        }
+    }
+}
+
+
+pipeline {
+    agent { label "master"}
+    stages {
+        stage('1') {
+            steps {
+                script {
+					// https://gist.github.com/paulchubatyy/da36322df9a1239bcab3b42d01b595d2
+					List repositories = github.getOrganization(githubOrganization).listRepositories(10).asList()
+					def changeLogSets = currentBuild.changeSets
+					for (int i = 0; i < changeLogSets.size(); i++) {
+						def entries = changeLogSets[i].items
+						for (int j = 0; j < entries.length; j++) {
+							def entry = entries[j]
+							echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
+							def files = new ArrayList(entry.affectedFiles)
+							for (int k = 0; k < files.size(); k++) {
+								def file = files[k]
+								echo "  ${file.editType.name} ${file.path}"
+								echo "${file.path}"
+							}
+						}
+					}
+                    def tests = [:]
+                    for (f in findFiles(glob: '**/html/*.html')) {
+                        tests["${f}"] = {
+                            node {
+                                stage("${f}") {
+                                    echo '${f}'
+                                }
+                            }
+                        }
+                    }
+                    parallel tests
+                }
+            }
+        }       
+    }
+}
+
 #!groovy
 
 pipeline {
@@ -45,6 +146,7 @@ pipeline {
   	//options {
     //	timestamps()
   	//}
+
     stages {	
         stage('Initiate') {
             steps {

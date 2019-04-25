@@ -1,42 +1,8 @@
-// https://read.acloud.guru/deploy-a-jenkins-cluster-on-aws-35dcf66a1eca
-
-
-// https://github.com/aboussetta/repo-01.git
-// https://github.com/aboussetta/repo-02.git
-// https://github.com/aboussetta/repo-03.git
-
-
-// While you can't use Groovy's .collect or similar methods currently, you can
-// still transform a list into a set of actual build steps to be executed in
-// parallel.
-
-#!groovy
-
 pipeline {
     agent any
     triggers {
         pollSCM('* * * * *')
     }
-
-	environment {
-		
-	}
-
-	libraries {
-
-	}
-
-	options {
-
-	}
-
-	parameters {
-
-	}
-
-	tools {
-
-	}
 	//logRotator {
   	//	Remove logs after two days
   	//	daysToKeep(2)
@@ -45,35 +11,8 @@ pipeline {
   	//options {
     //	timestamps()
   	//}
-    stages {	
-        stage('Initiate') {
-            steps {
-                echo 'Run Flyway Github'
-                git 'https://github.com/aboussetta/flyway.git'
-				println(currentBuild.changeSets) 
-				checkout scm
-				sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
-				stash includes: '*.sql', name: 'db'
-				println(currentBuild.changeSets) 
-				println(currentBuild.changeSets.items)
-            }
-        }
-        stage('Initiate Github Repository Pipelines') {
-            steps {
-				script{
-					def listRepositories = ["repo01", "repo02", "repo03"]
-					for (int i = 0; i < listRepositories.size(); i++) {
-						def repo = listRepositories[i]
-						println(repo)
-
-					}
-				}
-
-            }
-        }
-	}
 	//https://github.com/jenkinsci/pipeline-examples/tree/master/declarative-examples/simple-examples
-    stages {	
+    stages {
         stage('Checkout') {
             steps {
                 echo 'Run Flyway Github'
@@ -164,11 +103,6 @@ pipeline {
 					SQLPLUS_PATH='/Users/abderrahim.boussetta/instantclient_12_2/'
 					SQLPLUS_URL='//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
             }
-			when {
-              expression {
-                currentBuild.result == null || currentBuild.result == 'SUCCESS' 
-              }
-            }
             steps {
 				echo 'Run Flyway Migration - Status Before Rollout'
 				script{
@@ -229,11 +163,6 @@ pipeline {
 			}
 		}
         stage('Parallel - Dev Delivery') {
-			when {
-              expression {
-                currentBuild.result == null || currentBuild.result == 'SUCCESS' 
-              }
-            }
             failFast true // first to fail abort parallel execution
             parallel {
 				stage('DEVA - DB Delivery') {
@@ -551,7 +480,7 @@ def notifyBuild(String buildStatus = 'STARTED') {
     // Send notifications
     hipchatSend(color: color, notify: true, message: summary, token: "${env.HIPCHAT_TOKEN}",
         failOnError: true, room: "${env.HIPCHAT_ROOM}", sendAs: 'Jenkins', textFormat: true)
-	if (buildStatus == 'FAILURE') {
+if (buildStatus == 'FAILURE') {
         emailext attachLog: true, body: summary, compressLog: true, recipientProviders: [brokenTestsSuspects(), brokenBuildSuspects(), culprits()], replyTo: 'noreply@yourdomain.com', subject: subject, to: 'mpatel@yourdomain.com'
     }
 }
