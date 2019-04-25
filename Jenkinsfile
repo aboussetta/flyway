@@ -10,7 +10,7 @@
 // still transform a list into a set of actual build steps to be executed in
 // parallel.
 
-#!groovy
+//#!groovy
 
 pipeline {
     agent any
