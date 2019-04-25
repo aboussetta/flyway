@@ -73,7 +73,7 @@ pipeline {
     												checkout scm
 												}
 												// checkout scm
-												sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}'
+												sh "cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
 												// stash includes: '*.sql', name: 'db'
 												println(currentBuild.changeSets) 
 												println(currentBuild.changeSets.items)
