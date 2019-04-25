@@ -58,7 +58,7 @@ pipeline {
                                 		stage("${repo}") {
                                     		echo '${repo}'
                                 		}
-										stage('Checkout ${repo}') {
+										stage("Checkout ${repo}") {
             								steps {
                 								echo 'Run Flyway Github'
                 								git 'https://github.com/aboussetta/${repo}.git'
