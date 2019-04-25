@@ -57,14 +57,14 @@ pipeline {
                             		node {
                                 		stage("${repo}") {
 											steps{
-												println("${repo}")
+												println("stage - before checkout ${repo}")
 											}
                                 		}
 										stage("Checkout ${repo}") {
             								//steps {
                 								echo "Run Flyway Github"
 												println("git - ${repo}")
-                								git "https://github.com/aboussetta/${repo}.git"
+                								git 'https://github.com/aboussetta/${repo}.git'
 												println(currentBuild.changeSets) 
 												checkout scm
 												sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}'
