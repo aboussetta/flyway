@@ -388,11 +388,6 @@ pipeline {
 						}
 					}
 				}
-				post {
-					success {
-						stash name: "artifacts", includes: "artifacts/**/*"
-					}
-				}
 			}
 		}
 	}
