@@ -56,7 +56,9 @@ pipeline {
 								parallelRepos["${repo}"] = {
                             		node {
                                 		stage("${repo}") {
-                                    		echo '${repo}'
+											steps{
+												println("${repo}")
+											}
                                 		}
 										stage("Checkout ${repo}") {
             								steps {
