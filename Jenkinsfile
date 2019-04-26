@@ -115,7 +115,8 @@ pipeline {
 																echo "hey, ${file}"
 																//
 																def fileBaseName = sh(script: 'basename {file.path}',returnStdout: true)
-																echo "hey, ${fileBaseName}" 
+																println(fileBaseName)
+																echo 'hey coucou, ${fileBaseName}'
 																if (file.path.endsWith(".sql")) {
                         											echo "This a sql script"
 																	echo "hey, ${file.editType.name}, ${file.path}"
