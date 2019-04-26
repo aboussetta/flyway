@@ -114,12 +114,12 @@ pipeline {
 																echo "hey, ${file.editType.name}, ${file.path}"
 																echo "hey, ${file}"
 																//
-																myfile = file.name
-																echo "${myfile}" 
+																fileBaseName = sh(script: "basename ${file.path}",returnStdout: true)
+																echo "${fileBaseName}" 
 																if (file.path.endsWith(".sql")) {
                         											echo "This a sql script"
 																	echo "hey, ${file.editType.name}, ${file.path}"
-																	parallelSQLs["${file.path}"] = {
+																	parallelSQLs["${fileBaseName}"] = {
 																		echo "I am inside the ParallelSQLs"
 																		node {
 																			stage("Deploy SQL script: ${file.path}") {
