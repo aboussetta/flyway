@@ -112,14 +112,14 @@ pipeline {
 															for (int k = 0; k < files.size(); k++) {
 																def file = files[k]
 																echo "hey, ${file.editType.name}, ${file.path}"
-																echo "hey, ${file}"
+																//echo "hey, ${file}"
 																//
-																def fileBaseName = sh(script: 'basename {file.path}',returnStdout: true)
-																println(fileBaseName)
-																echo 'hey coucou, ${fileBaseName}'
+																// echo 'hey coucou, ${fileBaseName}'
 																if (file.path.endsWith(".sql")) {
                         											echo "This a sql script"
-																	echo "hey, ${file.editType.name}, ${file.path}"
+																	def fileBaseName = sh(script: 'basename {file.path}',returnStdout: true)
+																	println(fileBaseName)
+																	//echo "hey, ${file.editType.name}, ${file.path}"
 																	parallelSQLs["${fileBaseName}"] = {
 																		echo "I am inside the ParallelSQLs"
 																		node {
