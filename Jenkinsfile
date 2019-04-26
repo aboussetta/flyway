@@ -117,9 +117,10 @@ pipeline {
 																// echo 'hey coucou, ${fileBaseName}'
 																if (file.path.endsWith(".sql")) {
                         											echo "This a sql script"
-																	def fileBaseName = sh(script: 'basename ${file.path}',returnStdout: true)
+																	def fileBaseName = sh(script: "basename ${file.path}",returnStdout: true).trim()
+																	echo "hey,  ${fileBaseName}"
 																	println(fileBaseName)
-																	//echo "hey, ${file.editType.name}, ${file.path}"
+																	echo "hey, BEFORE parallelSQLs"
 																	parallelSQLs["${fileBaseName}"] = {
 																		echo "I am inside the ParallelSQLs"
 																		node {
