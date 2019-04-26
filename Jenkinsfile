@@ -114,6 +114,8 @@ pipeline {
 																echo "hey, ${file.editType.name}, ${file.path}"
 																echo "hey, ${file}"
 																//
+																myfile = file.name
+																echo "${myfile}" 
 																if (file.path.endsWith(".sql")) {
                         											echo "This a sql script"
 																	echo "hey, ${file.editType.name}, ${file.path}"
