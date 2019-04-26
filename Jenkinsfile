@@ -111,8 +111,8 @@ pipeline {
 															def files = new ArrayList(entry.affectedFiles)
 															for (int k = 0; k < files.size(); k++) {
 																def file = files[k]
-																echo "  ${file.editType.name} ${file.path}"
-																echo "${file}"
+																echo "hey, ${file.editType.name}, ${file.path}"
+																echo "hey, ${file.affectedFile}"
 																//
 																if ("${file.path}" == "*/*.sql") {
                         											echo "This a sql script"
@@ -124,7 +124,7 @@ pipeline {
                                 										stage("Deploy SQL script: ${file.path}") {
                                     										echo '${file.path}'
 																			def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
-        																	println "Renaming $file.name to ${timestamp}__$file.name"
+        																	println "Renaming ${file.name} to ${timestamp}__${file.name}"
 																        	file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$file.name")
 																			stage('Build - DB Migration') {
 																				environment {
