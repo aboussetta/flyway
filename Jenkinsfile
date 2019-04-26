@@ -7,6 +7,8 @@
 // https://github.com/aboussetta/repo-02.git
 // https://github.com/aboussetta/repo-03.git
 
+// https://github.com/alisw/docks/blob/master/Jenkinsfile
+
 //http://www.h2database.com/html/features.html
 // While you can't use Groovy's .collect or similar methods currently, you can
 // still transform a list into a set of actual build steps to be executed in
@@ -112,6 +114,11 @@ pipeline {
 																echo "  ${file.editType.name} ${file.path}"
 																echo "${file.path}"
 																//
+																if ("${file.path}" == "*.sql") {
+                        											echo "This a sql script"
+                    											} else {
+                        											echo "This is not a SQL script"
+                    											}
 																parallelSQLs["${file.path}"] = {
                             										node {
                                 										stage("Deploy SQL script: ${file.path}") {
