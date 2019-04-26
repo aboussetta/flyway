@@ -114,7 +114,10 @@ pipeline {
 																echo "hey, ${file.editType.name}, ${file.path}"
 																echo "hey, ${file}"
 																//
-																if ('${file.path}' == "*/*.sql") {
+																if (file.path.endsWith(".sql")) {
+          															echo "This a sql script"
+        														}
+																if ('${file.path}' == "${repo}/*.sql") {
                         											echo "This a sql script"
                     											} else {
                         											echo "This is not a SQL script"
@@ -179,7 +182,7 @@ pipeline {
 																								//def ret_undo_script_name = sh "$SQLPLUS_PATH/sqlplus -l -S $FLYWAY_USER/$FLYWAY_PASSWORD@$SQLPLUS_URL < ./retrieve_undo_script_name.sql"
 																								//def ret_flyway_undo = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS undo', returnStdout: true)
 																								//println(ret_flyway_undo)
-																								def undo_script_name = sh(script: "echo V10__add_rahim_table_with_error.sql | sed 's/^./U/'", returnStdout:true).trim()
+																								def undo_script_name = sh(script: "echo ${ret_undo_script_name} | sed 's/^./U/'", returnStdout:true).trim()
 																								//def undo_script_name = sh "echo V10__add_rahim_table_with_error.sql | sed 's/^./U/'"
 																								println(undo_script_name)
 
