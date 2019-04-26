@@ -114,7 +114,7 @@ pipeline {
 																echo "  ${file.editType.name} ${file.path}"
 																echo "${file.path}"
 																//
-																if ("${file.path}" == "*.sql") {
+																if ("${file.name}" == "*.sql") {
                         											echo "This a sql script"
                     											} else {
                         											echo "This is not a SQL script"
