@@ -114,7 +114,7 @@ pipeline {
 																//
 																parallelSQLs["${file.path}"] = {
                             										node {
-                                										stage("${file.path}") {
+                                										stage("Deploy SQL script: ${file.path}") {
                                     										echo '${file.path}'
 																			def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
         																	println "Renaming $file.name to ${timestamp}__$file.name"
