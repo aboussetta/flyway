@@ -6,7 +6,7 @@
 // https://github.com/aboussetta/repo-01.git
 // https://github.com/aboussetta/repo-02.git
 // https://github.com/aboussetta/repo-03.git
-
+// https://github.com/zeromq/czmq/blob/master/Jenkinsfile
 // https://github.com/alisw/docks/blob/master/Jenkinsfile
 
 //http://www.h2database.com/html/features.html
@@ -330,7 +330,7 @@ pipeline {
 																							}
 																							stage('STB - DB Delivery') {
 																								environment {
-																									FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
+																									FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}'
 																									FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/STB_FLYWAY'
 																									FLYWAY_USER='flyway_stb'
 																									FLYWAY_PASSWORD='flyway_123'
@@ -386,6 +386,7 @@ pipeline {
 														}
 													}
 												}
+												echo " before parallel parallelSQLs"
 												parallel parallelSQLs
 												// Archive the build output artifacts.
 												unstash 'db'
