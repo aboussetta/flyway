@@ -1094,3 +1094,836 @@ NUM_REPOS=1000
 DW_FOLDER="Github_${NUM_REPOS}_repos"
 cd ${DW_FOLDER}
 for REPO in $(curl https://api.github.com/users/${GITHUB_USER}/repos?per_page=${NUM_REPOS} | awk '/ssh_url/{print $2}' | sed 's/^"//g' | sed 's/",$//g') ; do git clone ${REPO} ; done
+
+
+
+
+
+#!groovy
+pipeline {
+agent {
+  docker {
+    image 'jenkinsslave:latest'
+    registryUrl 'http://8598567586.dkr.ecr.us-west-2.amazonaws.com'
+    registryCredentialsId 'ecr:us-east-1:3435443545-5546566-567765-3225'
+    args '-v /home/centos/.ivy2:/home/jenkins/.ivy2:rw -v jenkins_opt:/usr/local/bin/opt -v jenkins_apijenkins:/home/jenkins/config -v jenkins_logs:/var/logs -v jenkins_awsconfig:/home/jenkins/.aws --privileged=true -u jenkins:jenkins'
+  }
+}
+environment {
+    APP_NAME = 'billing-rest'
+    BUILD_NUMBER = "${env.BUILD_NUMBER}"
+    IMAGE_VERSION="v_${BUILD_NUMBER}"
+    GIT_URL="git@github.yourdomain.com:mpatel/${APP_NAME}.git"
+    GIT_CRED_ID='izleka2IGSTDK+MiYOG3b3lZU9nYxhiJOrxhlaJ1gAA='
+    REPOURL = 'cL5nSDa+49M.dkr.ecr.us-east-1.amazonaws.com'
+    SBT_OPTS='-Xmx1024m -Xms512m'
+    JAVA_OPTS='-Xmx1024m -Xms512m'
+    WS_PRODUCT_TOKEN='FJbep9fKLeJa/Cwh7IJbL0lPfdYg7q4zxvALAxWPLnc='
+    WS_PROJECT_TOKEN='zwzxtyeBntxX4ixHD1iE2dOr4DVFHPp7D0Czn84DEF4='
+    HIPCHAT_TOKEN = 'SpVaURsSTcWaHKulZ6L4L+sjKxhGXCkjSbcqzL42ziU='
+    HIPCHAT_ROOM = 'NotificationRoomName'
+}
+
+options {
+    buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '10', numToKeepStr: '20'))
+    timestamps()
+    retry(3)
+    timeout time:10, unit:'MINUTES'
+}
+parameters {
+    string(defaultValue: "develop", description: 'Branch Specifier', name: 'SPECIFIER')
+    booleanParam(defaultValue: false, description: 'Deploy to QA Environment ?', name: 'DEPLOY_QA')
+    booleanParam(defaultValue: false, description: 'Deploy to UAT Environment ?', name: 'DEPLOY_UAT')
+    booleanParam(defaultValue: false, description: 'Deploy to PROD Environment ?', name: 'DEPLOY_PROD')
+}
+stages {
+    stage("Initialize") {
+        steps {
+            script {
+                notifyBuild('STARTED')
+                echo "${BUILD_NUMBER} - ${env.BUILD_ID} on ${env.JENKINS_URL}"
+                echo "Branch Specifier :: ${params.SPECIFIER}"
+                echo "Deploy to QA? :: ${params.DEPLOY_QA}"
+                echo "Deploy to UAT? :: ${params.DEPLOY_UAT}"
+                echo "Deploy to PROD? :: ${params.DEPLOY_PROD}"
+                sh 'rm -rf target/universal/*.zip'
+            }
+        }
+    }
+stage('Checkout') {
+    steps {
+        git branch: "${params.SPECIFIER}", url: "${GIT_URL}"
+    }
+}
+stage('Build') {
+            steps {
+                echo 'Run coverage and CLEAN UP Before please'
+                sh '/usr/local/bin/opt/bin/sbtGitActivator; /usr/local/bin/opt/play-2.5.10/bin/activator -Dsbt.global.base=.sbt -Dsbt.ivy.home=/home/jenkins/.ivy2 -Divy.home=/home/jenkins/.ivy2 compile coverage test coverageReport coverageOff dist'
+            }
+        }
+stage('Publish Reports') {
+    parallel {
+        stage('Publish FindBugs Report') {
+            steps {
+                step([$class: 'FindBugsPublisher', canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: 'target/scala-2.11/findbugs/report.xml', unHealthy: ''])
+            }
+        }
+        stage('Publish Junit Report') {
+            steps {
+                junit allowEmptyResults: true, testResults: 'target/test-reports/*.xml'
+            }
+        }
+        stage('Publish Junit HTML Report') {
+            steps {
+                publishHTML target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: true,
+                        reportDir: 'target/reports/html',
+                        reportFiles: 'index.html',
+                        reportName: 'Test Suite HTML Report'
+                ]
+            }
+        }
+        stage('Publish Coverage HTML Report') {
+            steps {
+                publishHTML target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: true,
+                        reportDir: 'target/scala-2.11/scoverage-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Code Coverage'
+                ]
+            }
+        }
+        stage('Execute Whitesource Analysis') {
+            steps {
+                whitesource jobApiToken: '', jobCheckPolicies: 'global', jobForceUpdate: 'global', libExcludes: '', libIncludes: '', product: "${env.WS_PRODUCT_TOKEN}", productVersion: '', projectToken: "${env.WS_PROJECT_TOKEN}", requesterEmail: ''
+            }
+        }
+        stage('SonarQube analysis') {
+            steps {
+                sh "/usr/bin/sonar-scanner"
+            }
+        }
+        stage('ArchiveArtifact') {
+            steps {
+                archiveArtifacts '**/target/universal/*.zip'
+            }
+        }
+    }
+}
+
+ stage('Docker Tag & Push') {
+     steps {
+         script {
+             branchName = getCurrentBranch()
+             shortCommitHash = getShortCommitHash()
+             IMAGE_VERSION = "${BUILD_NUMBER}-" + branchName + "-" + shortCommitHash
+             sh 'eval $(aws ecr get-login --no-include-email --region us-west-2)'
+             sh "docker-compose build"
+             sh "docker tag ${REPOURL}/${APP_NAME}:latest ${REPOURL}/${APP_NAME}:${IMAGE_VERSION}"
+             sh "docker push ${REPOURL}/${APP_NAME}:${IMAGE_VERSION}"
+             sh "docker push ${REPOURL}/${APP_NAME}:latest"
+
+             sh "docker rmi ${REPOURL}/${APP_NAME}:${IMAGE_VERSION} ${REPOURL}/${APP_NAME}:latest"
+         }
+     }
+ }
+stage('Deploy') {
+    parallel {
+        stage('Deploy to CI') {
+            steps {
+                echo "Deploying to CI Environment."
+            }
+        }
+
+        stage('Deploy to QA') {
+            when {
+                expression {
+                    params.DEPLOY_QA == true
+                }
+            }
+            steps {
+                echo "Deploy to QA..."
+            }
+        }
+        stage('Deploy to UAT') {
+            when {
+                expression {
+                    params.DEPLOY_UAT == true
+                }
+            }
+            steps {
+                echo "Deploy to UAT..."
+            }
+        }
+        stage('Deploy to Production') {
+            when {
+                expression {
+                    params.DEPLOY_PROD == true
+                }
+            }
+            steps {
+                echo "Deploy to PROD..."
+            }
+        }
+    }
+}
+}
+
+    post {
+        /*
+         * These steps will run at the end of the pipeline based on the condition.
+         * Post conditions run in order regardless of their place in the pipeline
+         * 1. always - always run
+         * 2. changed - run if something changed from the last run
+         * 3. aborted, success, unstable or failure - depending on the status
+         */
+        always {
+            echo "I AM ALWAYS first"
+            notifyBuild("${currentBuild.currentResult}")
+        }
+        aborted {
+            echo "BUILD ABORTED"
+        }
+        success {
+            echo "BUILD SUCCESS"
+            echo "Keep Current Build If branch is master"
+//            keepThisBuild()
+        }
+        unstable {
+            echo "BUILD UNSTABLE"
+        }
+        failure {
+            echo "BUILD FAILURE"
+        }
+    }
+}
+def keepThisBuild() {
+    currentBuild.setKeepLog(true)
+    currentBuild.setDescription("Test Description")
+}
+
+def getShortCommitHash() {
+    return sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
+}
+
+def getChangeAuthorName() {
+    return sh(returnStdout: true, script: "git show -s --pretty=%an").trim()
+}
+
+def getChangeAuthorEmail() {
+    return sh(returnStdout: true, script: "git show -s --pretty=%ae").trim()
+}
+
+def getChangeSet() {
+    return sh(returnStdout: true, script: 'git diff-tree --no-commit-id --name-status -r HEAD').trim()
+}
+
+def getChangeLog() {
+    return sh(returnStdout: true, script: "git log --date=short --pretty=format:'%ad %aN <%ae> %n%n%x09* %s%d%n%b'").trim()
+}
+
+def getCurrentBranch () {
+    return sh (
+            script: 'git rev-parse --abbrev-ref HEAD',
+            returnStdout: true
+    ).trim()
+}
+
+def isPRMergeBuild() {
+    return (env.BRANCH_NAME ==~ /^PR-\d+$/)
+}
+
+def notifyBuild(String buildStatus = 'STARTED') {
+    // build status of null means successful
+    buildStatus = buildStatus ?: 'SUCCESS'
+
+    def branchName = getCurrentBranch()
+    def shortCommitHash = getShortCommitHash()
+    def changeAuthorName = getChangeAuthorName()
+    def changeAuthorEmail = getChangeAuthorEmail()
+    def changeSet = getChangeSet()
+    def changeLog = getChangeLog()
+
+    // Default values
+    def colorName = 'RED'
+    def colorCode = '#FF0000'
+    def subject = "${buildStatus}: '${env.JOB_NAME} [${env.BUILD_NUMBER}]'" + branchName + ", " + shortCommitHash
+    def summary = "Started: Name:: ${env.JOB_NAME} \n " +
+            "Build Number: ${env.BUILD_NUMBER} \n " +
+            "Build URL: ${env.BUILD_URL} \n " +
+            "Short Commit Hash: " + shortCommitHash + " \n " +
+            "Branch Name: " + branchName + " \n " +
+            "Change Author: " + changeAuthorName + " \n " +
+            "Change Author Email: " + changeAuthorEmail + " \n " +
+            "Change Set: " + changeSet
+
+    if (buildStatus == 'STARTED') {
+        color = 'YELLOW'
+        colorCode = '#FFFF00'
+    } else if (buildStatus == 'SUCCESS') {
+        color = 'GREEN'
+        colorCode = '#00FF00'
+    } else {
+        color = 'RED'
+        colorCode = '#FF0000'
+    }
+
+    // Send notifications
+    hipchatSend(color: color, notify: true, message: summary, token: "${env.HIPCHAT_TOKEN}",
+        failOnError: true, room: "${env.HIPCHAT_ROOM}", sendAs: 'Jenkins', textFormat: true)
+if (buildStatus == 'FAILURE') {
+        emailext attachLog: true, body: summary, compressLog: true, recipientProviders: [brokenTestsSuspects(), brokenBuildSuspects(), culprits()], replyTo: 'noreply@yourdomain.com', subject: subject, to: 'mpatel@yourdomain.com'
+    }
+}
+
+
+
+Conditions
+always
+Run the steps in the post section regardless of the completion status of the Pipeline’s or stage’s run.
+
+changed
+Only run the steps in post if the current Pipeline’s or stage’s run has a different completion status from its previous run.
+
+fixed
+Only run the steps in post if the current Pipeline’s or stage’s run is successful and the previous run failed or was unstable.
+
+regression
+Only run the steps in post if the current Pipeline’s or stage’s run’s status is failure, unstable, or aborted and the previous run was successful.
+
+aborted
+Only run the steps in post if the current Pipeline’s or stage’s run has an "aborted" status, usually due to the Pipeline being manually aborted. This is typically denoted by gray in the web UI.
+
+failure
+Only run the steps in post if the current Pipeline’s or stage’s run has a "failed" status, typically denoted by red in the web UI.
+
+success
+Only run the steps in post if the current Pipeline’s or stage’s run has a "success" status, typically denoted by blue or green in the web UI.
+
+unstable
+Only run the steps in post if the current Pipeline’s or stage’s run has an "unstable" status, usually caused by test failures, code violations, etc. This is typically denoted by yellow in the web UI.
+
+unsuccessful
+Only run the steps in post if the current Pipeline’s or stage’s run has not a "success" status. This is typically denoted in the web UI depending on the status previously mentioned
+
+cleanup
+Run the steps in this post condition after every other post condition has been evaluated, regardless of the Pipeline or stage’s status.
+
+Example
+
+
+
+Available Options
+buildDiscarder
+Persist artifacts and console output for the specific number of recent Pipeline runs. For example: options { buildDiscarder(logRotator(numToKeepStr: '1')) }
+
+checkoutToSubdirectory
+Perform the automatic source control checkout in a subdirectory of the workspace. For example: options { checkoutToSubdirectory('foo') }
+
+disableConcurrentBuilds
+Disallow concurrent executions of the Pipeline. Can be useful for preventing simultaneous accesses to shared resources, etc. For example: options { disableConcurrentBuilds() }
+
+newContainerPerStage
+Used with docker or dockerfile top-level agent. When specified, each stage will run in a new container instance on the same node, rather than all stages running in the same container instance.
+
+overrideIndexTriggers
+Allows overriding default treatment of branch indexing triggers. If branch indexing triggers are disabled at the multibranch or organization label, options { overrideIndexTriggers(true) } will enable them for this job only. Otherwise, options { overrideIndexTriggers(false) } will disable branch indexing triggers for this job only.
+
+preserveStashes
+Preserve stashes from completed builds, for use with stage restarting. For example: options { preserveStashes() } to preserve the stashes from the most recent completed build, or options { preserveStashes(buildCount: 5) } to preserve the stashes from the five most recent completed builds.
+
+quietPeriod
+Set the quiet period, in seconds, for the Pipeline, overriding the global default. For example: options { quietPeriod(30) }
+
+retry
+On failure, retry the entire Pipeline the specified number of times. For example: options { retry(3) }
+
+skipDefaultCheckout
+Skip checking out code from source control by default in the agent directive. For example: options { skipDefaultCheckout() }
+
+skipStagesAfterUnstable
+Skip stages once the build status has gone to UNSTABLE. For example: options { skipStagesAfterUnstable() }
+
+timeout
+Set a timeout period for the Pipeline run, after which Jenkins should abort the Pipeline. For example: options { timeout(time: 1, unit: 'HOURS') }
+
+timestamps
+Prepend all console output generated by the Pipeline run with the time at which the line was emitted. For example: options { timestamps() }
+
+parallelsAlwaysFailFast
+Set failfast true for all subsequent parallel stages in the pipeline. For example: options { parallelsAlwaysFailFast() }
+
+
+
+Available Parameters
+string
+A parameter of a string type, for example: parameters { string(name: 'DEPLOY_ENV', defaultValue: 'staging', description: '') }
+
+text
+A text parameter, which can contain multiple lines, for example: parameters { text(name: 'DEPLOY_TEXT', defaultValue: 'One\nTwo\nThree\n', description: '') }
+
+booleanParam
+A boolean parameter, for example: parameters { booleanParam(name: 'DEBUG_BUILD', defaultValue: true, description: '') }
+
+choice
+A choice parameter, for example: parameters { choice(name: 'CHOICES', choices: ['one', 'two', 'three'], description: '') }
+
+file
+A file parameter, which specifies a file to be submitted by the user when scheduling a build, for example: parameters { file(name: 'FILE', description: 'Some file to upload') }
+
+password
+A password parameter, for example: parameters { password(name: 'PASSWORD', defaultValue: 'SECRET', description: 'A secret password') }
+
+
+
+
+tools
+A section defining tools to auto-install and put on the PATH. This is ignored if agent none is specified.
+
+Required
+
+No
+
+Parameters
+
+None
+
+Allowed
+
+Inside the pipeline block or a stage block.
+
+Supported Tools
+maven
+jdk
+gradle
+
+
+
+input
+The input directive on a stage allows you to prompt for input, using the input step. The stage will pause after any options have been applied, and before entering the stage`s `agent or evaluating its when condition. If the input is approved, the stage will then continue. Any parameters provided as part of the input submission will be available in the environment for the rest of the stage.
+
+Configuration options
+message
+Required. This will be presented to the user when they go to submit the input.
+
+id
+An optional identifier for this input. Defaults to the stage name.
+
+ok
+Optional text for the "ok" button on the input form.
+
+submitter
+An optional comma-separated list of users or external group names who are allowed to submit this input. Defaults to allowing any user.
+
+submitterParameter
+An optional name of an environment variable to set with the submitter name, if present.
+
+parameters
+An optional list of parameters to prompt the submitter to provide. See parameters for more information.
+
+
+
+
+
+Built-in Conditions
+branch
+Execute the stage when the branch being built matches the branch pattern given, for example: when { branch 'master' }. Note that this only works on a multibranch Pipeline.
+
+buildingTag
+Execute the stage when the build is building a tag. Example: when { buildingTag() }
+
+changelog
+Execute the stage if the build’s SCM changelog contains a given regular expression pattern, for example: when { changelog '.*^\\[DEPENDENCY\\] .+$' }
+
+changeset
+Execute the stage if the build’s SCM changeset contains one or more files matching the given string or glob. Example: when { changeset "**/*.js" }
+
+By default the path matching will be case insensitive, this can be turned off with the caseSensitive parameter, for example: when { changeset glob: "ReadMe.*", caseSensitive: true }
+
+changeRequest
+Executes the stage if the current build is for a "change request" (a.k.a. Pull Request on GitHub and Bitbucket, Merge Request on GitLab or Change in Gerrit etc.). When no parameters are passed the stage runs on every change request, for example: when { changeRequest() }.
+
+By adding a filter attribute with parameter to the change request, the stage can be made to run only on matching change requests. Possible attributes are id, target, branch, fork, url, title, author, authorDisplayName, and authorEmail. Each of these corresponds to a CHANGE_* environment variable, for example: when { changeRequest target: 'master' }.
+
+The optional parameter comparator may be added after an attribute to specify how any patterns are evaluated for a match: EQUALS for a simple string comparison (the default), GLOB for an ANT style path glob (same as for example changeset), or REGEXP for regular expression matching. Example: when { changeRequest authorEmail: "[\\w_-.]+@example.com", comparator: 'REGEXP' }
+
+environment
+Execute the stage when the specified environment variable is set to the given value, for example: when { environment name: 'DEPLOY_TO', value: 'production' }
+
+equals
+Execute the stage when the expected value is equal to the actual value, for example: when { equals expected: 2, actual: currentBuild.number }
+
+expression
+Execute the stage when the specified Groovy expression evaluates to true, for example: when { expression { return params.DEBUG_BUILD } } Note that when returning strings from your expressions they must be converted to booleans or return null to evaluate to false. Simply returning "0" or "false" will still evaluate to "true".
+
+tag
+Execute the stage if the TAG_NAME variable matches the given pattern. Example: when { tag "release-*" }. If an empty pattern is provided the stage will execute if the TAG_NAME variable exists (same as buildingTag()).
+
+The optional parameter comparator may be added after an attribute to specify how any patterns are evaluated for a match: EQUALS for a simple string comparison, GLOB (the default) for an ANT style path glob (same as for example changeset), or REGEXP for regular expression matching. For example: when { tag pattern: "release-\\d+", comparator: "REGEXP"}
+
+not
+Execute the stage when the nested condition is false. Must contain one condition. For example: when { not { branch 'master' } }
+
+allOf
+Execute the stage when all of the nested conditions are true. Must contain at least one condition. For example: when { allOf { branch 'master'; environment name: 'DEPLOY_TO', value: 'production' } }
+
+anyOf
+Execute the stage when at least one of the nested conditions is true. Must contain at least one condition. For example: when { anyOf { branch 'master'; branch 'staging' } }
+
+triggeredBy
+Execute the stage when the current build has been triggered by the param given. For example:
+
+when { triggeredBy 'SCMTrigger' }
+
+when { triggeredBy 'TimerTrigger' }
+
+when { triggeredBy 'UpstreamCause' }
+
+when { triggeredBy cause: "UserIdCause", detail: "vlinde" }
+
+
+
+#!/usr/bin/env groovy
+userInput = ""
+stage('Choose environment') {
+  userInput = input(id: 'userInput',    
+                    message: 'Choose an environment',    
+                    parameters: [
+                      [$class: 'ChoiceParameterDefinition', choices: "Dev\nQA\nProd", name: 'Env']
+                           ]  
+  )
+}
+stage('Deploy code'){
+  node('deploy'){
+    if (userInput.Env == "Dev") {
+      // deploy dev stuff
+    } else if (userInput.Env == "QA"){
+      // deploy qa stuff
+    } else {
+      // deploy prod stuff
+  }
+}
+
+
+stage('deploy'){
+  node('aws'){
+    sh """          
+    ### Create stack with new code          
+    aws cloudformation create-stack \            
+      --region us-west-2 \            
+      --capabilities CAPABILITY_IAM \            
+      --stack-name app-${GIT_BRANCH}-${BUILD_NUMBER} \            
+      --template-body file://cf/template.yaml
+    """
+  }
+}
+
+
+passThis = "input of some kind"
+stage('run script'){
+  node('jenkins-worker'){
+    sh '''#!/bin/bash
+    scripts/do-the-thing.sh '''+passThis+'''
+    #more code
+    '''
+  }
+}
+
+
+try {
+  node('deployment') {
+    // deploy code
+  } catch (err) {
+    // do stuff! maybe fire off a Slack notification?
+    notify("#dev", "@here ${JOB} failed during build")
+    // and now fail the pipeline by re-throwing the error
+    throw err
+  }
+}
+
+
+def notify(channel,text) {  
+  slackSend (channel: "${channel}", message: "${text}", teamDomain: "$YOURTEAMDOMAIN", token: "$YOURSLACKTOKEN")  
+}
+
+
+
+
+
+node('NODE NAME') 
+{ 
+    withEnv([REQUIRED ENV VARIBALES]) 
+    {   withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'CREDENTIALS ID', passwordVariable: 'PW', usernameVariable: 'USER']]) 
+        {   try 
+                {   stage 'Build' 
+                        checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: gitbranch]], doGenerateSubmoduleConfigurations: false, 
+                                  extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'CREDENTIALS ID', 
+                                  url: 'GIT URL']]]
+
+                                ****
+                                MAVEN BUILD
+                                ****
+
+                    stage 'Docker Image build & Push'
+                                *****
+                                DOCKER BUILD AND PUSH TO REPO
+                                *****
+                }
+              catch (err) {
+                notify("Failed ${err}")
+                currentBuild.result = 'FAILURE'
+                }
+
+                stage 'Deploy to ENV'
+
+                *****
+                DEPLOYMENT TO REQUIRED ENV
+                *****
+
+                notify('Success -Deployed to Environment')
+
+                catch (err) {
+                 notify("Failed ${err}")
+                currentBuild.result = 'FAILURE'
+                } 
+        }   
+    }
+}
+
+def notify(status)
+{
+****
+NOTIFICATION FUCNTION
+****
+}
+
+https://github.com/vamsigoli/sakila-h2-files
+
+java -cp h2-1.4.197.jar org.h2.tools.RunScript -url jdbc:h2:~/testsakila;MODE=Oracle -user flyway -password test123 -script c:\Users\vamsi\Downloads\oracle-sakila-db\oracle-sakila-schema.sql
+
+parmesan:drivers abderrahim.boussetta$ java -cp drivers/h2-1.4.197.jar org.h2.tools.RunScript -url jdbc:h2:file:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle -script V15__add_ayah_table.sql;MODE=ORACLE
+
+
+parmesan:flyway-5.2.4 abderrahim.boussetta$ java -cp drivers/ojdbc8.jar org.h2.tools.RunScript -url jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY;MODE=Oracle -user flyway -password flyway_123 -script /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/V15__add_ayah_table.sql
+
+
+
+flyway migrate -target=1.2. 
+
+
+But, if you choose to prefix your migrations using timestamps rather than integers, then the likelihood of a collision virtually disappears, even across branches.  For example, using a pattern such as yyyyMMddHHmmssSSS the migrations above now look like…
+
+20130704144750766__add_customers_table.sql
+20130706132142244__add_email_address_column_to_customers_table.sql
+20130706151409978__add_orders_table_with_reference_to_customer_table.sql
+
+
+
+task prefixNewMigrations {
+
+  fileTree(dir: 'dev/src/db/listhub').exclude({ isFilePrefixed(it.file) }).each { file ->
+        doLast {
+
+        	def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
+
+        	println "Renaming $file.name to ${timestamp}__$file.name"
+        	
+        	file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$file.name")
+        	
+        	// Sleep for a moment to avoid prefix conflicts when renaming multiple files
+        	sleep(1*1000)
+        }
+    }
+}
+
+def isFilePrefixed(file) {
+	return (file.name ==~ '^\\d+__.*\\.sql\$')
+}
+
+
+
+
+
+Also:   java.lang.NoSuchMethodError: No such DSL method 'steps' found among steps [ansiblePlaybook, ansibleVault, archive, bat, build, catchError, checkout, cucumberSlackSend, deleteDir, dir, dockerFingerprintFrom, dockerFingerprintRun, echo, emailext, emailextrecipients, envVarsForTool, error, fileExists, getContext, git, githubNotify, input, isUnix, jiraAddComment, jiraAddWatcher, jiraAssignIssue, jiraAssignableUserSearch, jiraComment, jiraDeleteAttachment, jiraDeleteIssueLink, jiraDeleteIssueRemoteLink, jiraDeleteIssueRemoteLinks, jiraDownloadAttachment, jiraEditComment, jiraEditComponent, jiraEditIssue, jiraEditVersion, jiraGetAttachmentInfo, jiraGetComment, jiraGetComments, jiraGetComponent, jiraGetComponentIssueCount, jiraGetFields, jiraGetIssue, jiraGetIssueLink, jiraGetIssueLinkTypes, jiraGetIssueRemoteLink, jiraGetIssueRemoteLinks, jiraGetIssueTransitions, jiraGetIssueWatches, jiraGetProject, jiraGetProjectComponents, jiraGetProjectStatuses, jiraGetProjectVersions, jiraGetProjects, jiraGetServerInfo, jiraGetVersion, jiraIssueSelector, jiraJqlSearch, jiraLinkIssues, jiraNewComponent, jiraNewIssue, jiraNewIssueRemoteLink, jiraNewIssues, jiraNewVersion, jiraNotifyIssue, jiraSearch, jiraTransitionIssue, jiraUploadAttachment, jiraUserSearch, junit, library, libraryResource, load, lock, mail, milestone, node, office365ConnectorSend, parallel, powershell, properties, publishHTML, pwd, readFile, readTrusted, resolveScm, retry, script, setGitHubPullRequestStatus, sh, slackSend, sleep, stage, stash, step, svn, timeout, timestamps, tm, tool, unarchive, unstash, validateDeclarativePipeline, waitUntil, withContext, withCredentials, withDockerContainer, withDockerRegistry, withDockerServer, withEnv, wrap, writeFile, ws] or symbols [Number, Open, all, allOf, allowRunOnStatus, always, ant, antFromApache, antOutcome, antTarget, any, anyOf, apiToken, architecture, archiveArtifacts, artifactManager, asIsGITScm, authorizationMatrix, batchFile, bitbucket, booleanParam, branch, branchCreated, branches, brokenBuildSuspects, brokenTestsSuspects, buildButton, buildDiscarder, buildParameter, buildingTag, caseInsensitive, caseSensitive, certificate, changeRequest, changelog, changeset, checkoutToSubdirectory, choice, choiceParam, cleanWs, clock, close, cloud, command, commentPattern, commit, commitChanged, commitMessagePattern, configFile, configFileProvider, copyArtifactPermission, copyArtifacts, created, credentials, cron, crumb, cucumber, culprits, defaultView, deleted, demand, description, developers, disableConcurrentBuilds, disableResume, docker, dockerCert, dockerfile, downloadFeatureFiles, downloadSettings, downstream, dumb, durabilityHint, envVars, environment, equals, expression, file, fileParam, filePath, fingerprint, flyway, flywayrunner, frameOptions, freeStyle, freeStyleJob, fromScm, fromSource, git, gitHub, gitHubEvents, gitHubPRStatus, gitHubPlugin, github, githubBranches, githubPRAddLabels, githubPRClosePublisher, githubPRComment, githubPRMessage, githubPRRemoveLabels, githubPRStatusPublisher, githubPlugin, githubPullRequests, githubPush, globalConfigFiles, gradle, hashChanged, headRegexFilter, headWildcardFilter, hyperlink, hyperlinkToModels, inheriting, inheritingGlobal, installSource, isRestartedRun, jdk, jdkInstaller, jgit, jgitapache, jiraArrayEntry, jiraSelectableArrayField, jiraSelectableField, jiraStringArrayField, jiraStringField, jiraTestResultReporter, jnlp, jobName, label, labels, labelsAdded, labelsExist, labelsNotExist, labelsPatternExists, labelsRemoved, lastCompleted, lastDuration, lastFailure, lastGrantedAuthorities, lastStable, lastSuccess, lastSuccessful, lastWithArtifacts, latestSavedBuild, legacy, legacySCM, list, livingDocs, local, location, logRotator, loggedInUsersCanDoAnything, masterBuild, maven, maven3Mojos, mavenErrors, mavenMojos, mavenWarnings, message, modernSCM, myView, newContainerPerStage, noGITScm, node, nodeProperties, nonInheriting, nonMergeable, none, not, office365ConnectorSend, office365ConnectorWebhooks, overrideIndexTriggers, paneStatus, parallelsAlwaysFailFast, parameters, password, pattern, permalink, permanent, pipeline-model, pipelineTriggers, plainText, plugin, pollSCM, preserveStashes, projectNamingStrategy, proxy, publishTestResults, pullRequest, pullRequests, queueItemAuthenticator, quietPeriod, rateLimitBuilds, recipients, requestor, restriction, restrictions, run, runParam, s3CopyArtifact, s3Upload, schedule, scmRetryCount, scriptApprovalLink, search, security, shell, skipDefaultCheckout, skipStagesAfterUnstable, slackNotifier, slave, sourceRegexFilter, sourceWildcardFilter, specific, sshUserPrivateKey, stackTrace, standard, status, statusOnPublisherError, string, stringParam, swapSpace, tag, tags, text, textParam, tmpSpace, toolLocation, triggeredBy, unsecured, upstream, upstreamDevelopers, userSeed, usernameColonPassword, usernamePassword, viewsTabBar, weather, withAnt, workspace, zfs, zip] or globals [currentBuild, docker, env, params, pipeline, scm]
+
+
+
+def releaseTag, activeSvc, canarySvc
+
+pipeline {
+  agent any
+
+  stages {
+    stage('Select Version') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject('dev') {
+              def tags = openshift.selector("istag").objects().collect { it.metadata.name }.findAll { it.startsWith 'mapit-spring:' }.collect { it.replaceAll(/mapit-spring:(.*)/, "\$1") }.sort()
+  
+              timeout(10) {
+                releaseTag = input(
+                  ok: "Deploy",
+                  message: "Enter release version to promote to PROD",
+                  parameters: [
+                    choice(choices: tags.join('\n'), description: '', name: 'Release Version')
+                  ]
+                )
+              }
+            }
+          }
+        }
+      }
+    }
+    stage('Deploy Canary 10%') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject('prod') {
+              openshift.tag("dev/mapit-spring:${releaseTag}", "prod/mapit-spring:${releaseTag}")
+
+              activeSvc = openshift.selector("route", "mapit-spring").object().spec.to.name
+              def suffix = (activeSvc ==~ /mapit-spring-(\d+)/) ? (activeSvc.replaceAll(/mapit-spring-(\d+)/, '$1') as int) + 1 : "1"
+              canarySvc = "mapit-spring-${suffix}"
+
+              def dc = openshift.newApp("mapit-spring:${releaseTag}", "--name=${canarySvc}").narrow('dc')
+              openshift.set("probe dc/${canarySvc} --readiness --get-url=http://:8080/ --initial-delay-seconds=30 --failure-threshold=10 --period-seconds=10")
+              openshift.set("probe dc/${canarySvc} --liveness  --get-url=http://:8080/ --initial-delay-seconds=180 --failure-threshold=10 --period-seconds=10")
+
+              dc.rollout().status()
+
+              openshift.set("route-backends", "mapit-spring", "${activeSvc}=90%", "${canarySvc}=10%")
+            }
+          }
+        }
+      }
+    }
+    stage('Grow Canary 50%') {
+      steps {
+        timeout(time:15, unit:'MINUTES') {
+            input message: "Send 50% of live traffic to new release?", ok: "Approve"
+        }
+        script {
+          openshift.withCluster() {
+            openshift.withProject('prod') {
+              openshift.set("route-backends", "mapit-spring", "${activeSvc}=50%", "${canarySvc}=50%")
+            }
+          }
+        }
+      }
+    }
+    stage('Rollout 100%') {
+      steps {
+        timeout(time:15, unit:'MINUTES') {
+            input message: "Send 100% of live traffic to the new release?", ok: "Approve"
+        }
+        script {
+          openshift.withCluster() {
+            openshift.withProject('prod') {
+              openshift.set("route-backends", "mapit-spring", "${canarySvc}=100%")
+              openshift.selector(["dc/${activeSvc}", "svc/${activeSvc}"]).delete()
+            }
+          }
+        }
+      }
+    }
+  }
+  post { 
+    aborted {
+      script {
+        openshift.withCluster() {
+          openshift.withProject('prod') {
+            echo "Rolling back to current release ${activeSvc} and deleting the canary"
+            openshift.set("route-backends", "mapit-spring", "${activeSvc}=100%")
+            openshift.selector(["dc/${canarySvc}", "svc/${canarySvc}"]).delete()
+          }
+        }
+      }
+    }
+    failure { 
+      script {
+        openshift.withCluster() {
+          openshift.withProject('prod') {
+            echo "Rolling back to current release ${activeSvc} and deleting the canary"
+            openshift.set("route-backends", "mapit-spring", "${activeSvc}=100%")
+            openshift.selector(["dc/${canarySvc}", "svc/${canarySvc}"]).delete()
+          }
+        }
+      }
+    }
+  }
+}
+
+
+#!groovy
+
+node("docker-light") {
+
+  stage "Verify author"
+  def power_users = ["ktf", "dberzano"]
+  def deployable_branches = ["master"]
+  echo "Changeset from " + env.CHANGE_AUTHOR
+  if (power_users.contains(env.CHANGE_AUTHOR)) {
+    echo "PR comes from power user. Testing"
+  } else if(deployable_branches.contains(env.BRANCH_NAME)) {
+    echo "Building master branch."
+  } else {
+    input "Do you want to test this change?"
+  }
+
+  stage "Build containers"
+  wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
+    withEnv([ "BRANCH_NAME=${env.BRANCH_NAME}",
+              "CHANGE_TARGET=${env.CHANGE_TARGET}"]) {
+      dir ("docks") {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                          credentialsId: '75206d40-8dcf-4f44-aea4-e3a32bc201b3',
+                          usernameVariable: 'DOCK_USER',
+                          passwordVariable: 'DOCK_PASSWORD']]) {
+          retry(2) {
+            timeout(900) {
+              checkout scm
+              sh '''
+                set -e
+                set -o pipefail
+                packer version
+                GIT_DIFF_SRC="origin/$CHANGE_TARGET"
+                [[ $CHANGE_TARGET == null || -z $CHANGE_TARGET ]] && GIT_DIFF_SRC="HEAD^"
+                IMAGES=`git diff --name-only $GIT_DIFF_SRC.. | (grep / || true) | sed -e 's|/.*||' | uniq`
+                case $BRANCH_NAME in
+                  master) DOCKER_HUB_REPO=alisw    ;;
+                  *)      DOCKER_HUB_REPO=aliswdev ;;
+                esac
+                export PACKER_LOG=1
+                export PACKER_LOG_PATH=$PWD/packer.log
+                mkdir -p /build/packer && [[ -d /build/packer ]]
+                export TMPDIR=$(mktemp -d /build/packer/packer-XXXXX)
+                export HOME=$TMPDIR
+                yes | docker login -u "$DOCK_USER" -p "$DOCK_PASSWORD" || true
+                unset DOCK_USER DOCK_PASSWORD
+                for x in $IMAGES ; do
+                  if ! test -f $x/packer.json ; then
+                    echo "Image $x does not use Packer, skipping test."
+                    continue
+                  elif grep DOCKER_HUB_REPO "$x/packer.json" ; then
+                    pushd "$x"
+                     /usr/bin/packer build -var "DOCKER_HUB_REPO=${DOCKER_HUB_REPO}" packer.json || { cat $PACKER_LOG_PATH; false; }
+                     echo "Image $x built successfully and uploaded as $DOCKER_HUB_REPO/$x"
+                    popd
+                  else
+                    echo "$x/packer.json does not use DOCKER_HUB_REPO."
+                    exit 1
+                  fi
+                done
+              '''
+            }
+          }
+        }
+      }
+    }
+  }
+}

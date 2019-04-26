@@ -112,13 +112,14 @@ pipeline {
 															for (int k = 0; k < files.size(); k++) {
 																def file = files[k]
 																echo "hey, ${file.editType.name}, ${file.path}"
-																echo "hey, ${file.affectedFile}"
+																echo "hey, ${file}"
 																//
 																if ('${file.path}' == "*/*.sql") {
                         											echo "This a sql script"
                     											} else {
                         											echo "This is not a SQL script"
                     											}
+																echo "hey, ${file.editType.name}, ${file.path}"
 																parallelSQLs["${file.path}"] = {
                             										node {
                                 										stage("Deploy SQL script: ${file.path}") {
