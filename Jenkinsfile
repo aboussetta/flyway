@@ -114,7 +114,7 @@ pipeline {
 																echo "hey, ${file.editType.name}, ${file.path}"
 																echo "hey, ${file}"
 																//
-																if (file.path.endsWith(".sql") {
+																if (file.path.endsWith(".sql")) {
                         											echo "This a sql script"
 																	echo "hey, ${file.editType.name}, ${file.path}"
 																	parallelSQLs["${file.path}"] = {
