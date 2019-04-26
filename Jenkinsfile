@@ -382,9 +382,6 @@ pipeline {
 																		}
 																	}
 																}
-																else {
-																	echo 'This not a SQL script'
-																}
 															}
 														}
 													}
