@@ -130,9 +130,7 @@ pipeline {
 																	echo "hey, BEFORE parallelSQLs"
 																	println("hey, BEFORE parallelSQLs")
 																	println("hey, BEFORE parallelSQLs  ------- ${k} ------")
-																	parallelSQLs["${k}"] = {
-																		echo "I am inside the ParallelSQLs"
-																		println("I am inside the ParallelSQLs")
+																	parallelSQLs[k] = {
 																		node {
 																			stage("Deploy SQL script: ${file.path}") {
 																				echo '${file.path}'
