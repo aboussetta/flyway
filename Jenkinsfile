@@ -122,7 +122,7 @@ pipeline {
 																	// println(fileBaseName)
 																	// echo "rahim,  $fileBaseName"
 																	
-																	fileBaseName = sh([script: "/usr/bin/basename ${file.path}", returnStdout: true]).trim()
+																	fileBaseName = sh("/usr/bin/basename ${file.path}")
 																	println(fileBaseName)
 																	
 																	echo "rahim,  $fileBaseName"
