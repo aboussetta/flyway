@@ -132,9 +132,9 @@ pipeline {
 																	println("hey, BEFORE parallelSQLs")
 																	println("hey, BEFORE parallelSQLs  ------- ${k} ------")
 																	parallelSQLs["{k}"] = {
-																		//node {
-																			stage("Deploy SQL script: ${file.path}") {
-																				echo '${file.path}'
+																		node {
+																			stage("Deploy SQL script ${file.path}") {
+																				echo "${file.path}"
 																				def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
 																				println("Renaming ${file.name} to ${timestamp}__${file.name}")
 																				file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$file.name")
@@ -392,7 +392,7 @@ pipeline {
 																					}
 																				}
 																			}
-																		//}
+																		}
 																	}
 																}
 															}
@@ -400,6 +400,7 @@ pipeline {
 													}
 												}
 												echo " before parallel parallelSQLs"
+												echo "${parallelSQLs}"
 												parallel parallelSQLs
 												// Archive the build output artifacts.
 												// unstash 'db'
