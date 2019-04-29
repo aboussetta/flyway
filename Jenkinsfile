@@ -72,7 +72,7 @@ pipeline {
                 								// git "https://github.com/aboussetta/flyway/${repo}.git"
 												println(currentBuild.changeSets)
 												dir('${repo}') {
-    												checkout scm
+    												checkout scm ${repo}
 												}
 												// checkout scm
 												sh "cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
@@ -117,12 +117,12 @@ pipeline {
 																// echo 'hey coucou, ${fileBaseName}'
 																if (file.path.endsWith(".sql")) {
                         											echo "This a sql script"
-																	filename = file.path
+																	def filename = file.path
 																	def fileBaseName = sh([script: "/usr/bin/basename $filename",returnStdout: true]).trim()
-																	echo "hey,  ${fileBaseName}"
+																	echo "hey,  $fileBaseName"
 																	println(fileBaseName)
 																	echo "hey, BEFORE parallelSQLs"
-																	parallelSQLs["${fileBaseName}"] = {
+																	parallelSQLs["$fileBaseName"] = {
 																		echo "I am inside the ParallelSQLs"
 																		node {
 																			stage("Deploy SQL script: ${file.path}") {
