@@ -119,7 +119,7 @@ pipeline {
                         											echo "This a sql script"
 																	def filename = file.path
 																	script{
-																		fileBaseName = sh([script: '/usr/bin/basename $filename',returnStdout: true]).trim()
+																		fileBaseName = sh([script: "/usr/bin/basename $filename",returnStdout: true]).trim()
 																	}
 																	echo "hey,  $fileBaseName"
 																	println(fileBaseName)
