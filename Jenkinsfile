@@ -122,8 +122,10 @@ pipeline {
 																	echo "hey,  $fileBaseName"
 																	println(fileBaseName)
 																	echo "hey, BEFORE parallelSQLs"
+																	println("hey, BEFORE parallelSQLs")
 																	parallelSQLs["$fileBaseName"] = {
 																		echo "I am inside the ParallelSQLs"
+																		println("I am inside the ParallelSQLs")
 																		node {
 																			stage("Deploy SQL script: ${file.path}") {
 																				echo '${file.path}'
