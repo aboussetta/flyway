@@ -118,7 +118,7 @@ pipeline {
 																if (file.path.endsWith(".sql")) {
                         											echo "This a sql script"
 																	def filename = file.path
-																	fileBaseName = sh 'basename $filename'
+																	fileBaseName = sh 'basename ${file.path}'
 																	println(fileBaseName)
 																	echo "rahim,  $fileBaseName"
 																	script{
