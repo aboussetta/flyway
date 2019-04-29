@@ -133,6 +133,9 @@ pipeline {
 																	println("hey, BEFORE parallelSQLs  ------- ${k} ------")
 																	parallelSQLs["{k}"] = {
 																		node {
+																			echo "hey, AFTER parallelSQLs"
+																			println("hey, AFTER parallelSQLs")
+																			println("hey, AFTER parallelSQLs  ------- ${k} ------")
 																			stage("Deploy SQL script ${file.path}") {
 																				echo "${file.path}"
 																				def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
