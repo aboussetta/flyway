@@ -117,12 +117,12 @@ pipeline {
 																// echo 'hey coucou, ${fileBaseName}'
 																if (file.path.endsWith(".sql")) {
                         											echo "This a sql script"
-																	def filename = file.path
+																	filename = file.path
 																	// fileBaseName = sh 'ls -ltr ${file.path}'
 																	// println(fileBaseName)
 																	// echo "rahim,  $fileBaseName"
 																	
-																	def fileBaseName = sh([script: "/usr/bin/basename ${file.path}", returnStdout: true]).trim()
+																	fileBaseName = sh([script: "/usr/bin/basename ${file.path}", returnStdout: true]).trim()
 																	println(fileBaseName)
 																	
 																	echo "rahim,  $fileBaseName"
