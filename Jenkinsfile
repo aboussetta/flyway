@@ -57,7 +57,7 @@ pipeline {
 								def repo = listRepositories[r]
 								println(repo)
 								parallelRepos["${repo}"] = {
-                            		node {
+                            		//node {
                                 		stage("${repo}") {
 											//steps{
 												println("stage - before checkout ${repo}")
@@ -132,7 +132,10 @@ pipeline {
 																	println("hey, BEFORE parallelSQLs")
 																	println("hey, BEFORE parallelSQLs  ------- ${k} ------")
 																	parallelSQLs["{k}"] = {
-																		node {
+																		echo "hey, AFTER parallelSQLs"
+																		println("hey, AFTER parallelSQLs")
+																		println("hey, AFTER parallelSQLs  ------- ${k} ------")
+																		//node {
 																			echo "hey, AFTER parallelSQLs"
 																			println("hey, AFTER parallelSQLs")
 																			println("hey, AFTER parallelSQLs  ------- ${k} ------")
@@ -395,7 +398,7 @@ pipeline {
 																					}
 																				}
 																			}
-																		}
+																		//}
 																	}
 																}
 															}
@@ -413,8 +416,8 @@ pipeline {
 															message: "Press OK to initiate BUILD ?",
 															emailPrompt: "Build ${currentBuild.description} is ready to BUILD."
 												}
-											//}
-										}	
+											}
+										//}	
 									}
 								}
 							}
