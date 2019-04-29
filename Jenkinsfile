@@ -100,8 +100,8 @@ pipeline {
 												// 
 												//cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
 												echo "Gathering SCM SQL changes Pipelines"
+												def parallelSQLs = [:]
 												script{
-													def parallelSQLs = [:]
 													def changeLogSets = currentBuild.changeSets
 													for (int i = 0; i < changeLogSets.size(); i++) {
 														def entries = changeLogSets[i].items
