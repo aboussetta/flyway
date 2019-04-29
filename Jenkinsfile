@@ -66,10 +66,10 @@ pipeline {
             								//steps {
                 								echo "Run Flyway Github"
 												println("git - ${repo}")
-												dir("${repo}") {
-    												checkout scm
-												}
-                								// git "https://github.com/aboussetta/flyway/${repo}.git"
+												//dir("${repo}") {
+    											//	checkout scm
+												//}
+                								git "https://github.com/aboussetta/flyway/${repo}.git"
 												println(currentBuild.changeSets)
 												dir('${repo}') {
     												checkout scm ${repo}
