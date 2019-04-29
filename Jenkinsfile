@@ -72,7 +72,7 @@ pipeline {
                 								git "https://github.com/aboussetta/flyway.git"
 												println(currentBuild.changeSets)
 												dir('${repo}') {
-    												checkout scm ${repo}
+    												checkout scm
 												}
 												// checkout scm
 												sh "cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
