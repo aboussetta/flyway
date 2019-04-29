@@ -129,7 +129,8 @@ pipeline {
 																	//println(fileBaseName)
 																	echo "hey, BEFORE parallelSQLs"
 																	println("hey, BEFORE parallelSQLs")
-																	parallelSQLs["$k"] = {
+																	println("hey, BEFORE parallelSQLs  ------- ${k} ------")
+																	parallelSQLs["${k}"] = {
 																		echo "I am inside the ParallelSQLs"
 																		println("I am inside the ParallelSQLs")
 																		node {
