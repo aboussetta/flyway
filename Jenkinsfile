@@ -125,7 +125,7 @@ pipeline {
 																		def fileBaseName = sh([script: 'basename "${filename}"',returnStdout: true]).trim()
 																		println(fileBaseName)
 																	}
-																	echo "hey,  $fileBaseName"
+																	echo "rahim,  $fileBaseName"
 																	println(fileBaseName)
 																	echo "hey, BEFORE parallelSQLs"
 																	println("hey, BEFORE parallelSQLs")
