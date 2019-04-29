@@ -122,14 +122,14 @@ pipeline {
 																	// println(fileBaseName)
 																	// echo "rahim,  $fileBaseName"
 																	
-																	fileBaseName = sh("/usr/bin/basename ${file.path}")
-																	println(fileBaseName)
+																	//fileBaseName = sh('basename ${file.path}')
+																	//println(fileBaseName)
 																	
-																	echo "rahim,  $fileBaseName"
-																	println(fileBaseName)
+																	//echo "rahim,  $fileBaseName"
+																	//println(fileBaseName)
 																	echo "hey, BEFORE parallelSQLs"
 																	println("hey, BEFORE parallelSQLs")
-																	parallelSQLs["$fileBaseName"] = {
+																	parallelSQLs["$k"] = {
 																		echo "I am inside the ParallelSQLs"
 																		println("I am inside the ParallelSQLs")
 																		node {
