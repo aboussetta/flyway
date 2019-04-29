@@ -69,7 +69,7 @@ pipeline {
 												//dir("${repo}") {
     											//	checkout scm
 												//}
-                								git "https://github.com/aboussetta/flyway/${repo}.git"
+                								git "https://github.com/aboussetta/flyway.git"
 												println(currentBuild.changeSets)
 												dir('${repo}') {
     												checkout scm ${repo}
