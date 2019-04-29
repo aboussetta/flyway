@@ -51,6 +51,7 @@ pipeline {
     	        	steps {
 						script{
 							def parallelRepos = [:]
+							def parallelSQLs = [:]
 							def listRepositories = ["flyway", "repo-01", "repo-02", "repo-03"]
 							for (int r = 0; r < listRepositories.size(); r++) {
 								def repo = listRepositories[r]
@@ -100,7 +101,6 @@ pipeline {
 												// 
 												//cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
 												echo "Gathering SCM SQL changes Pipelines"
-												def parallelSQLs = [:]
 												script{
 													def changeLogSets = currentBuild.changeSets
 													for (int i = 0; i < changeLogSets.size(); i++) {
