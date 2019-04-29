@@ -401,7 +401,7 @@ pipeline {
 												echo " before parallel parallelSQLs"
 												parallel parallelSQLs
 												// Archive the build output artifacts.
-												unstash 'db'
+												// unstash 'db'
 												archiveArtifacts artifacts: '*.sql', fingerprint: true
 												timeout(time: 5, unit: 'DAYS') {
 													notifyAwaitApproval approvers: getApprovers(developer),
