@@ -132,7 +132,7 @@ pipeline {
 																	println("hey, BEFORE parallelSQLs")
 																	println("hey, BEFORE parallelSQLs  ------- ${k} ------")
 																	parallelSQLs["{k}"] = {
-																		node {
+																		//node {
 																			stage("Deploy SQL script: ${file.path}") {
 																				echo '${file.path}'
 																				def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
@@ -392,7 +392,7 @@ pipeline {
 																					}
 																				}
 																			}
-																		}
+																		//}
 																	}
 																}
 															}
@@ -403,7 +403,7 @@ pipeline {
 												parallel parallelSQLs
 												// Archive the build output artifacts.
 												// unstash 'db'
-												archiveArtifacts artifacts: '*.sql', fingerprint: true
+												//archiveArtifacts artifacts: '*.sql', fingerprint: true
 												timeout(time: 5, unit: 'DAYS') {
 													notifyAwaitApproval approvers: getApprovers(developer),
 															message: "Press OK to initiate BUILD ?",
