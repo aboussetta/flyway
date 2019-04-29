@@ -121,10 +121,10 @@ pipeline {
 																	// fileBaseName = sh 'ls -ltr ${file.path}'
 																	// println(fileBaseName)
 																	// echo "rahim,  $fileBaseName"
-																	script{
-																		def fileBaseName = sh([script: "ls -ltr ${file.path}",returnStdout: true]).trim()
-																		println(fileBaseName)
-																	}
+																	
+																	def fileBaseName = sh([script: "/usr/bin/basename ${file.path}", returnStdout: true]).trim()
+																	println(fileBaseName)
+																	
 																	echo "rahim,  $fileBaseName"
 																	println(fileBaseName)
 																	echo "hey, BEFORE parallelSQLs"
