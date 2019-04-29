@@ -427,7 +427,7 @@ pipeline {
 				}
 			}
 		}
-	}
+	//}
 	post {
         always {
             echo 'COMPLETED'
