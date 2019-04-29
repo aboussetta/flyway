@@ -119,7 +119,7 @@ pipeline {
                         											echo "This a sql script"
 																	def filename = file.path
 																	script{
-																		def fileBaseName = sh([script: "/usr/bin/basename $filename",returnStdout: true]).trim()
+																		def fileBaseName = sh([script: '/usr/bin/basename ${filename}',returnStdout: true]).trim()
 																	}
 																	echo "hey,  $fileBaseName"
 																	println(fileBaseName)
@@ -132,7 +132,7 @@ pipeline {
 																			stage("Deploy SQL script: ${file.path}") {
 																				echo '${file.path}'
 																				def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
-																				println "Renaming ${file.name} to ${timestamp}__${file.name}"
+																				println("Renaming ${file.name} to ${timestamp}__${file.name}")
 																				file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$file.name")
 																				stage('Build - DB Migration') {
 																					environment {
