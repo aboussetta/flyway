@@ -170,6 +170,8 @@ pipeline {
 																			echo "hey, AFTER parallelSQLs"
 																			println("hey, AFTER parallelSQLs")
 																			println("hey, AFTER parallelSQLs  ------- ${fileBaseName} ------")
+
+																			println("hey, Deploy  ------- ${fileBaseName} ------")
 																			stage("Deploy SQL script ${fileBaseName}") {
 																				echo "${fileBaseName}"
 																				//def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
