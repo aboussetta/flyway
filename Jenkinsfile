@@ -96,7 +96,8 @@ pipeline {
 												// stash includes: '*.sql', name: 'db'
 												println(currentBuild.changeSets) 
 												println(currentBuild.changeSets.items)
-
+												def FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
+												println(FLYWAY_LOCATIONS)
             								//}
         								}
         								//stage('Create Build Cucumber Reporting') {
@@ -184,7 +185,7 @@ pipeline {
 																					//def FLYWAY_LOCATIONS = null
 																					 
 																					//environment {
-																							def FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}'
+																						 FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
 																							def FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
 																							def FLYWAY_USER='flyway'
 																							def FLYWAY_PASSWORD='flyway_123'
