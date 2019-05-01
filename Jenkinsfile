@@ -120,6 +120,7 @@ pipeline {
 												echo "Gathering SCM SQL changes Pipelines"
 												
 												script{
+													def fileBaseName = null
 													def parallelSQLs = [:]
 													def changeLogSets = currentBuild.changeSets
 													for (int i = 0; i < changeLogSets.size(); i++) {
