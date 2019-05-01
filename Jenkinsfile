@@ -139,7 +139,7 @@ pipeline {
 																	// fileBaseName = sh 'ls -ltr ${file.path}'
 																	// println(fileBaseName)
 																	// echo "rahim,  $fileBaseName"
-																	def fileBaseName = sh(script: "echo ${file.path}##*/", returnStdout:true).trim()
+																	def fileBaseName = sh(script: "echo ${file.path##*/}", returnStdout:true).trim()
 																	println(fileBaseName)
 																	try {
 																		// Fails with non-zero exit if dir1 does not exist 
