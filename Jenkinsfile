@@ -169,9 +169,9 @@ pipeline {
 																		println("hey, BEFORE node")
 
 																		// node {
-																			echo "hey, AFTER parallelSQLs"
-																			println("hey, AFTER parallelSQLs")
-																			println("hey, AFTER parallelSQLs  ------- ${fileBaseName} ------")
+																			//echo "hey, AFTER parallelSQLs"
+																			//println("hey, AFTER parallelSQLs")
+																			//println("hey, AFTER parallelSQLs  ------- ${fileBaseName} ------")
 
 																			println("hey, Deploy  ------- ${fileBaseName} ------")
 																			stage("Deploy SQL script ${fileBaseName}") {
@@ -179,8 +179,8 @@ pipeline {
 																				//def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
 																				//println("Renaming ${fileBaseName} to ${timestamp}__${fileBaseName}")
 																				//file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$fileBaseName")
-
 																				stage('Build - DB Migration') {
+																					println("Build - DB Migration , Deploy  ------- ${fileBaseName} ------ on ---- ${repo}")
 																					environment {
 																							FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}'
 																							FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
