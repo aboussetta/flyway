@@ -139,10 +139,16 @@ pipeline {
 																	// fileBaseName = sh 'ls -ltr ${file.path}'
 																	// println(fileBaseName)
 																	// echo "rahim,  $fileBaseName"
-																	
+																	try {
+																		// Fails with non-zero exit if dir1 does not exist
+																		def fileBaseName = sh(script: "basename ${file.path}", returnStdout:true).trim()
+																		println(fileBaseName)
+																	} catch (Exception ex) {
+																		println("Unable to read fileBaseName: ${ex}")
+																	}
 																	//def fileBaseName = sh('basename ${file.path}')
-																	def fileBaseName = sh(script: "basename ${file.path}", returnStdout:true).trim()
-																	println(fileBaseName)
+																	//def fileBaseName = sh(script: "basename ${file.path}", returnStdout:true).trim()
+																	//println(fileBaseName)
 																	
 																	echo "rahim,  $fileBaseName"
 																	//println(fileBaseName)
@@ -162,6 +168,7 @@ pipeline {
 																				def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
 																				println("Renaming ${file.name} to ${timestamp}__${file.name}")
 																				file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$file.name")
+
 																				stage('Build - DB Migration') {
 																					environment {
 																							FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}'
