@@ -170,11 +170,11 @@ pipeline {
 																			echo "hey, AFTER parallelSQLs"
 																			println("hey, AFTER parallelSQLs")
 																			println("hey, AFTER parallelSQLs  ------- ${fileBaseName} ------")
-																			stage("Deploy SQL script ${file.path}") {
-																				echo "${file.path}"
-																				def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
-																				println("Renaming ${fileBaseName} to ${timestamp}__${fileBaseName}")
-																				file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$fileBaseName")
+																			stage("Deploy SQL script ${fileBaseName}") {
+																				echo "${fileBaseName}"
+																				//def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
+																				//println("Renaming ${fileBaseName} to ${timestamp}__${fileBaseName}")
+																				//file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$fileBaseName")
 
 																				stage('Build - DB Migration') {
 																					environment {
