@@ -166,6 +166,8 @@ pipeline {
 																		echo "hey, AFTER parallelSQLs"
 																		println("hey, AFTER parallelSQLs")
 																		println("hey, AFTER parallelSQLs  ------- ${fileBaseName} ------")
+																		println("hey, BEFORE node")
+
 																		node {
 																			echo "hey, AFTER parallelSQLs"
 																			println("hey, AFTER parallelSQLs")
