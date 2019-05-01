@@ -140,7 +140,8 @@ pipeline {
 																	// println(fileBaseName)
 																	// echo "rahim,  $fileBaseName"
 																	
-																	fileBaseName = sh('basename ${file.path}')
+																	//def fileBaseName = sh('basename ${file.path}')
+																	def fileBaseName = sh(script: "basename ${file.path}", returnStdout:true).trim()
 																	println(fileBaseName)
 																	
 																	echo "rahim,  $fileBaseName"
@@ -148,7 +149,7 @@ pipeline {
 																	echo "hey, BEFORE parallelSQLs"
 																	println("hey, BEFORE parallelSQLs")
 																	println("hey, BEFORE parallelSQLs  ------- ${k} ------")
-																	parallelSQLs["${k}""] = {
+																	parallelSQLs["${k}"] = {
 																		echo "hey, AFTER parallelSQLs"
 																		println("hey, AFTER parallelSQLs")
 																		println("hey, AFTER parallelSQLs  ------- ${k} ------")
