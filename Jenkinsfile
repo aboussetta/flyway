@@ -140,15 +140,15 @@ pipeline {
 																	// println(fileBaseName)
 																	// echo "rahim,  $fileBaseName"
 																	
-																	//fileBaseName = sh('basename ${file.path}')
-																	//println(fileBaseName)
+																	fileBaseName = sh('basename ${file.path}')
+																	println(fileBaseName)
 																	
-																	//echo "rahim,  $fileBaseName"
+																	echo "rahim,  $fileBaseName"
 																	//println(fileBaseName)
 																	echo "hey, BEFORE parallelSQLs"
 																	println("hey, BEFORE parallelSQLs")
 																	println("hey, BEFORE parallelSQLs  ------- ${k} ------")
-																	parallelSQLs["{k}"] = {
+																	parallelSQLs["${k}""] = {
 																		echo "hey, AFTER parallelSQLs"
 																		println("hey, AFTER parallelSQLs")
 																		println("hey, AFTER parallelSQLs  ------- ${k} ------")
