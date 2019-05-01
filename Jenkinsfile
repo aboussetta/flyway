@@ -197,7 +197,8 @@ pipeline {
 																							currentBuild.result == null || currentBuild.result == 'SUCCESS' 
 																						}
 																					}
-																					steps {
+																					println("Build - DB Migration , Run Flyway Migration - Status Before Rollout")
+																					// steps {
 																						echo 'Run Flyway Migration - Status Before Rollout'
 																						script{
 																							def ret_flyway_migrate = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info', returnStdout: true)
@@ -210,7 +211,7 @@ pipeline {
 																								// dryRun
 																								// def ret_flyway_migrate = sh(script:'java -cp drivers/* org.h2.tools.RunScript -url jdbc:h2:file:$FLYWAY_LOCATIONS -script ${file.path}' , returnStdout: true)
 																						}
-																					}
+																					// step }
 																					post {
 																						success {
 																							echo 'The build -  DB Migration was successful!'
