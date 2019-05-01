@@ -98,6 +98,9 @@ pipeline {
 												println(currentBuild.changeSets.items)
 												def filename = "repo-02/V17__create_table.sql"
 												def fileBaseName = filename.toString().split('/').last()
+												println(filename)
+												println(fileBaseName)
+
             								//}
         								}
         								//stage('Create Build Cucumber Reporting') {
