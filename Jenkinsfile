@@ -193,11 +193,11 @@ pipeline {
 																							SQLPLUS_URL='//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
 																					}
 																					println("Build - DB Migration , Run Flyway Migration - Status Before When")
-																					when {
-																						expression {
-																							currentBuild.result == null || currentBuild.result == 'SUCCESS' 
-																						}
-																					}
+																					//when {
+																					//	expression {
+																					//		currentBuild.result == null || currentBuild.result == 'SUCCESS' 
+																					//	}
+																					//}
 																					println("Build - DB Migration , Run Flyway Migration - Status Before Rollout")
 																					// steps {
 																						echo 'Run Flyway Migration - Status Before Rollout'
@@ -255,18 +255,18 @@ pipeline {
 																					}
 																				}
 																				stage('BUILD - Code Approval') {
-																					steps {
+																					//steps {
 																						echo 'Building..'
 																						input(message: 'Do you want to proceed', id: 'yes', ok: 'yes', submitter: "developer", submitterParameter: "developer")
-																					}
+																					//}
 																				}
 																				// Developpement Parallel Pipeline
 																				stage('Parallel - Dev Delivery') {
-																					when {
-																						expression {
-																							currentBuild.result == null || currentBuild.result == 'SUCCESS' 
-																						}
-																					}
+																					//when {
+																					//	expression {
+																					//		currentBuild.result == null || currentBuild.result == 'SUCCESS' 
+																					//	}
+																					//}
 																					failFast true // first to fail abort parallel execution
 																					parallel {
 																						stage('DEVA - DB Delivery') {
@@ -286,11 +286,11 @@ pipeline {
 																								FLYWAY_SCHEMAS='FLYWAY_DEVA'
 																								FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
 																							}
-																							steps {
+																							//steps {
 																								echo 'Run Flyway Migration - Rollout'
 																								unstash 'db'
 																								sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
-																							}
+																							//}
 																							post {
 																								failure {
 																									echo 'Run Flyway Migration - Rollback'
@@ -342,11 +342,11 @@ pipeline {
 																										FLYWAY_SCHEMAS='FLYWAY_DEVB'
 																										FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
 																								}
-																								steps {
+																								//steps {
 																										echo 'Run Flyway Migration'
 																										unstash 'db'
 																										sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
-																								}
+																								//}
 																								post {
 																									failure {
 																										echo 'Run Flyway Migration - Rollback'
@@ -358,13 +358,13 @@ pipeline {
 																				}
 																				// Development Approvals
 																				stage('Results - Development') {
-																					steps {
+																					//steps {
 																						script {			
 																							timeout(time: 1, unit: 'DAYS') {
 																								def userInput = input message: 'Approve Delivery on Development or Rollback?'
 																							}
 																						}
-																					}
+																					//}
 																				}
 																				// Staging Parallel Pipeline Delivery
 																				stage('Parallel - Stage Delivery') {
@@ -379,11 +379,11 @@ pipeline {
 																								FLYWAY_SCHEMAS='FLYWAY_STA'
 																								FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
 																								}
-																								steps {
+																								//steps {
 																									echo 'Run Flyway Migration'
 																									unstash 'db'
 																									sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
-																								}
+																								//}
 																							}
 																							stage('STB - DB Delivery') {
 																								environment {
@@ -394,11 +394,11 @@ pipeline {
 																									FLYWAY_SCHEMAS='FLYWAY_STB'
 																									FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
 																								}
-																								steps {
+																								//steps {
 																									echo 'Run Flyway Migration'
 																									unstash 'db'
 																									sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
-																								}
+																								//}
 																							}
 																					}	
 																				}
