@@ -146,7 +146,7 @@ pipeline {
 																	try {
 																		// Fails with non-zero exit if dir1 does not exist 
 																		//def fileBaseName = sh(script: "$(basename ${file.path} .sql)", returnStdout:true).trim()
-																		def fileBaseName = filename.toString().split('/').last()
+																		fileBaseName = filename.toString().split('/').last()
 																		println(filename)
 																		//def cwd = sh(script: 'basename $($filename)', returnStdout: true).trim()
 																		println(fileBaseName)
