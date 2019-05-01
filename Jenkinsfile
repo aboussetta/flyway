@@ -206,10 +206,10 @@ pipeline {
 																					println("Build - DB Migration , Run Flyway Migration - Status Before Rollout")
 																					// steps {
 																						echo 'Run Flyway Migration - Status Before Rollout'
-																						script{
-																							def ret_flyway_migrate = sh(script: '${FLYWAY_PATH}/flyway -user=${FLYWAY_USER} -password=${FLYWAY_PASSWORD} -url=${FLYWAY_URL} -locations=${FLYWAY_LOCATIONS} info', returnStdout: true)
+																						//script{
+																							def ret_flyway_migrate = sh(script: "${FLYWAY_PATH}/flyway -user=${FLYWAY_USER} -password=${FLYWAY_PASSWORD} -url=${FLYWAY_URL} -locations=${FLYWAY_LOCATIONS} info", returnStdout: true)
 																							println(ret_flyway_migrate)
-																						}
+																						//}
 																						echo 'Run Flyway Migration'
 																						script{
 																								def ret_flyway_migrate = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate', returnStdout: true)
