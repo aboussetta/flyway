@@ -139,9 +139,11 @@ pipeline {
 																	// fileBaseName = sh 'ls -ltr ${file.path}'
 																	// println(fileBaseName)
 																	// echo "rahim,  $fileBaseName"
+																	def fileBaseName = sh(script: "echo ${${file.path}##*/}", returnStdout:true).trim()
+																	println(fileBaseName)
 																	try {
-																		// Fails with non-zero exit if dir1 does not exist
-																		def fileBaseName = sh(script: "`basename ${file.path}`", returnStdout:true).trim()
+																		// Fails with non-zero exit if dir1 does not exist 
+																		def fileBaseName = sh(script: "$(basename "${file.path}" .sql)", returnStdout:true).trim()
 																		println(fileBaseName)
 																	} catch (Exception ex) {
 																		println("Unable to read fileBaseName: ${ex}")
