@@ -192,6 +192,7 @@ pipeline {
 																							SQLPLUS_PATH='/Users/abderrahim.boussetta/instantclient_12_2/'
 																							SQLPLUS_URL='//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
 																					}
+																					println("Build - DB Migration , Run Flyway Migration - Status Before When")
 																					when {
 																						expression {
 																							currentBuild.result == null || currentBuild.result == 'SUCCESS' 
