@@ -135,16 +135,17 @@ pipeline {
 																// echo 'hey coucou, ${fileBaseName}'
 																if (file.path.endsWith(".sql")) {
                         											echo "This a sql script"
-																	filename = file.path
+																	def filename = file.path
 																	// fileBaseName = sh 'ls -ltr ${file.path}'
 																	// println(fileBaseName)
 																	// echo "rahim,  $fileBaseName"
-																	def fileBaseName = sh(script: "echo ${file.path##*/}", returnStdout:true).trim()
-																	println(fileBaseName)
+																	//def fileBaseName = sh(script: "echo ${file.path##*/}", returnStdout:true).trim()
+																	//println(fileBaseName)
 																	try {
 																		// Fails with non-zero exit if dir1 does not exist 
 																		//def fileBaseName = sh(script: "$(basename ${file.path} .sql)", returnStdout:true).trim()
-																		println(fileBaseName)
+																		def cwd = sh(script: 'basename $(filename)', returnStdout: true).trim()
+																		println(cwd)
 																	} catch (Exception ex) {
 																		println("Unable to read fileBaseName: ${ex}")
 																	}
