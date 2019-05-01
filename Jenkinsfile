@@ -16,6 +16,19 @@
 
 //#!groovy
 
+def performDeploymentStages(String node, String app) {
+    stage("build") {
+        echo "Building the app [${app}] on node [${node}]"
+    }
+    stage("deploy") {
+        echo "Deploying the app ${app}] on node [${node}]"
+    }
+    stage("test") {
+        echo "Testing the app [${app}] on node [${node}]"
+    }
+}
+
+
 pipeline {
     agent any
     triggers {
@@ -31,8 +44,12 @@ pipeline {
 	//options {
 	//}
 
-	//parameters {
-	//}
+	parameters {
+        string(name: 'REPOS', defaultValue: 'flyway,repo-01,repo-02,repo-03', description: 'Nodes to build, deploy and test')
+        choice(name: 'ENV', choices: 'qa', description: 'Environment')
+        string(name: 'SQLs', defaultValue: 'script1,script2', description: 'Script names')
+    }
+
 
 	//tools {
 	//}
@@ -51,7 +68,6 @@ pipeline {
     	        	steps {
 						script{
 							def parallelRepos = [:]
-							def parallelSQLs = [:]
 							def listRepositories = ["flyway", "repo-01", "repo-02", "repo-03"]
 							for (int r = 0; r < listRepositories.size(); r++) {
 								def repo = listRepositories[r]
@@ -103,6 +119,7 @@ pipeline {
 												echo "Gathering SCM SQL changes Pipelines"
 												
 												script{
+													def parallelSQLs = [:]
 													def changeLogSets = currentBuild.changeSets
 													for (int i = 0; i < changeLogSets.size(); i++) {
 														def entries = changeLogSets[i].items
@@ -291,20 +308,20 @@ pipeline {
 																										println(ret_flyway_repair)
 																										sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info'
 																									}	
-
 																								}
 																							}	
 																						}
+																		
 																						stage('DEVB - DB Delivery') {
-																									environment {
+																								environment {
 																										FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}'
 																										FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DVB_FLYWAY'
 																										FLYWAY_USER='flyway_devb'
 																										FLYWAY_PASSWORD='flyway_123'
 																										FLYWAY_SCHEMAS='FLYWAY_DEVB'
 																										FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
-																									}
-																									steps {
+																								}
+																								steps {
 																										echo 'Run Flyway Migration'
 																										unstash 'db'
 																										sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
@@ -404,10 +421,11 @@ pipeline {
 															}
 														}
 													}
+													echo " before parallel parallelSQLs"
+													echo "${parallelSQLs}"
+													parallel parallelSQLs
 												}
-												echo " before parallel parallelSQLs"
-												echo "${parallelSQLs}"
-												parallel parallelSQLs
+
 												// Archive the build output artifacts.
 												// unstash 'db'
 												//archiveArtifacts artifacts: '*.sql', fingerprint: true
@@ -420,14 +438,15 @@ pipeline {
 										}	
 									}
 								}
+								parallel parallelRepos
 							}
-							parallel parallelRepos
+							
 						}
 					}
 				}
 			}
 		}
-	}
+	//}
 	post {
         always {
             echo 'COMPLETED'
