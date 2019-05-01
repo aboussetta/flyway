@@ -181,19 +181,19 @@ pipeline {
 																				//file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$fileBaseName")
 																				stage('Build - DB Migration') {
 																					println("Build - DB Migration , Deploy  ------- ${fileBaseName} ------ on ---- ${repo}")
-																					def FLYWAY_LOCATIONS = null
+																					//def FLYWAY_LOCATIONS = null
 																					 
-																					environment {
-																							FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}'
-																							FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
-																							FLYWAY_USER='flyway'
-																							FLYWAY_PASSWORD='flyway_123'
-																							FLYWAY_SCHEMAS='FLYWAY'
-																							FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
-																							FLYWAY_EDITION='enterprise'
-																							SQLPLUS_PATH='/Users/abderrahim.boussetta/instantclient_12_2/'
-																							SQLPLUS_URL='//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
-																					}
+																					//environment {
+																							def FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}'
+																							def FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
+																							def FLYWAY_USER='flyway'
+																							def FLYWAY_PASSWORD='flyway_123'
+																							def FLYWAY_SCHEMAS='FLYWAY'
+																							def FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
+																							def FLYWAY_EDITION='enterprise'
+																							def SQLPLUS_PATH='/Users/abderrahim.boussetta/instantclient_12_2/'
+																							def SQLPLUS_URL='//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
+																					//}
 																					echo "${FLYWAY_LOCATIONS}"
 																					println(FLYWAY_LOCATIONS)
 
