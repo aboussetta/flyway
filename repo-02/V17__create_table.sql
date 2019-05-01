@@ -1,4 +1,3 @@
--- help 04
 -- help 05
 create table toto (name varchar2(10));
 
