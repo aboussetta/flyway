@@ -141,7 +141,7 @@ pipeline {
 																	// echo "rahim,  $fileBaseName"
 																	try {
 																		// Fails with non-zero exit if dir1 does not exist
-																		def fileBaseName = sh(script: "basename ${file.path}", returnStdout:true).trim()
+																		def fileBaseName = sh(script: "`basename ${file.path}`", returnStdout:true).trim()
 																		println(fileBaseName)
 																	} catch (Exception ex) {
 																		println("Unable to read fileBaseName: ${ex}")
