@@ -168,7 +168,7 @@ pipeline {
 																		println("hey, AFTER parallelSQLs  ------- ${fileBaseName} ------")
 																		println("hey, BEFORE node")
 
-																		node {
+																		// node {
 																			echo "hey, AFTER parallelSQLs"
 																			println("hey, AFTER parallelSQLs")
 																			println("hey, AFTER parallelSQLs  ------- ${fileBaseName} ------")
@@ -434,7 +434,7 @@ pipeline {
 																					}
 																				}
 																			}
-																		}
+																		//node }
 																	}
 																}
 															}
