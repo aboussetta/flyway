@@ -207,12 +207,12 @@ pipeline {
 																					// steps {
 																						echo 'Run Flyway Migration - Status Before Rollout'
 																						//script{
-																							def ret_flyway_migrate = sh(script: "${FLYWAY_PATH}/flyway -user=${FLYWAY_USER} -password=${FLYWAY_PASSWORD} -url=${FLYWAY_URL} -locations=${FLYWAY_LOCATIONS} info", returnStdout: true)
-																							println(ret_flyway_migrate)
+																							def ret_flyway_migrate_info = sh(script: "${FLYWAY_PATH}/flyway -user=${FLYWAY_USER} -password=${FLYWAY_PASSWORD} -url=${FLYWAY_URL} -locations=${FLYWAY_LOCATIONS} info", returnStdout: true)
+																							println(ret_flyway_migrate_info)
 																						//}
 																						echo 'Run Flyway Migration'
 																						script{
-																								def ret_flyway_migrate = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate', returnStdout: true)
+																								def ret_flyway_migrate = sh(script: "${FLYWAY_PATH}/flyway -user=${FLYWAY_USER} -password=${FLYWAY_PASSWORD} -url=${FLYWAY_URL} -locations=${FLYWAY_LOCATIONS} migrate", returnStdout: true)
 																								println(ret_flyway_migrate)
 																								// dryRun
 																								// def ret_flyway_migrate = sh(script:'java -cp drivers/* org.h2.tools.RunScript -url jdbc:h2:file:$FLYWAY_LOCATIONS -script ${file.path}' , returnStdout: true)
