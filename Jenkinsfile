@@ -96,8 +96,8 @@ pipeline {
 												// stash includes: '*.sql', name: 'db'
 												println(currentBuild.changeSets) 
 												println(currentBuild.changeSets.items)
-												def FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
-												println(FLYWAY_LOCATIONS)
+												//def FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
+												//println(FLYWAY_LOCATIONS)
             								//}
         								}
         								//stage('Create Build Cucumber Reporting') {
@@ -185,15 +185,15 @@ pipeline {
 																					//def FLYWAY_LOCATIONS = null
 																					 
 																					//environment {
-																						  FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
-																							def FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
-																							def FLYWAY_USER='flyway'
-																							def FLYWAY_PASSWORD='flyway_123'
-																							def FLYWAY_SCHEMAS='FLYWAY'
-																							def FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4'
-																							def FLYWAY_EDITION='enterprise'
-																							def SQLPLUS_PATH='/Users/abderrahim.boussetta/instantclient_12_2/'
-																							def SQLPLUS_URL='//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
+																						  def FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
+																							def FLYWAY_URL="jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY"
+																							def FLYWAY_USER="flyway"
+																							def FLYWAY_PASSWORD="flyway_123"
+																							def FLYWAY_SCHEMAS="FLYWAY"
+																							def FLYWAY_PATH="/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway-5.2.4"
+																							def FLYWAY_EDITION="enterprise"
+																							def SQLPLUS_PATH="/Users/abderrahim.boussetta/instantclient_12_2/"
+																							def SQLPLUS_URL="//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY"
 																					//}
 																					echo "${FLYWAY_LOCATIONS}"
 																					println(FLYWAY_LOCATIONS)
