@@ -96,10 +96,6 @@ pipeline {
 												// stash includes: '*.sql', name: 'db'
 												println(currentBuild.changeSets) 
 												println(currentBuild.changeSets.items)
-												def filename = "repo-02/V17__create_table.sql"
-												def fileBaseName = filename.toString().split('/').last()
-												println(filename)
-												println(fileBaseName)
 
             								//}
         								}
@@ -150,7 +146,7 @@ pipeline {
 																		// Fails with non-zero exit if dir1 does not exist 
 																		//def fileBaseName = sh(script: "$(basename ${file.path} .sql)", returnStdout:true).trim()
 																		def fileBaseName = filename.toString().split('/').last()
-
+																		println(filename)
 																		//def cwd = sh(script: 'basename $($filename)', returnStdout: true).trim()
 																		println(fileBaseName)
 																	} catch (Exception ex) {
@@ -447,11 +443,11 @@ pipeline {
 												// Archive the build output artifacts.
 												// unstash 'db'
 												//archiveArtifacts artifacts: '*.sql', fingerprint: true
-												timeout(time: 5, unit: 'DAYS') {
-													notifyAwaitApproval approvers: getApprovers(developer),
-															message: "Press OK to initiate BUILD ?",
-															emailPrompt: "Build ${currentBuild.description} is ready to BUILD."
-												}
+												//timeout(time: 5, unit: 'DAYS') {
+												//	notifyAwaitApproval approvers: getApprovers(developer),
+												//			message: "Press OK to initiate BUILD ?",
+												//			emailPrompt: "Build ${currentBuild.description} is ready to BUILD."
+												//}
 											}
 										}	
 									}
