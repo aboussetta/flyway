@@ -153,7 +153,7 @@ pipeline {
 																	//def fileBaseName = sh(script: "basename ${file.path}", returnStdout:true).trim()
 																	//println(fileBaseName)
 																	
-																	echo "rahim,  $fileBaseName"
+																	echo "rahim,  $cwd"
 																	//println(fileBaseName)
 																	echo "hey, BEFORE parallelSQLs"
 																	println("hey, BEFORE parallelSQLs")
