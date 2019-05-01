@@ -156,24 +156,24 @@ pipeline {
 																	//def fileBaseName = sh(script: "basename ${file.path}", returnStdout:true).trim()
 																	//println(fileBaseName)
 																	
-																	echo "rahim,  $cwd"
+																	//echo "rahim,  $cwd"
 																	//println(fileBaseName)
 																	echo "hey, BEFORE parallelSQLs"
 																	println("hey, BEFORE parallelSQLs")
-																	println("hey, BEFORE parallelSQLs  ------- ${k} ------")
-																	parallelSQLs["${k}"] = {
+																	println("hey, BEFORE parallelSQLs  ------- ${fileBaseName} ------")
+																	parallelSQLs["${fileBaseName}"] = {
 																		echo "hey, AFTER parallelSQLs"
 																		println("hey, AFTER parallelSQLs")
-																		println("hey, AFTER parallelSQLs  ------- ${k} ------")
+																		println("hey, AFTER parallelSQLs  ------- ${fileBaseName} ------")
 																		node {
 																			echo "hey, AFTER parallelSQLs"
 																			println("hey, AFTER parallelSQLs")
-																			println("hey, AFTER parallelSQLs  ------- ${k} ------")
+																			println("hey, AFTER parallelSQLs  ------- ${fileBaseName} ------")
 																			stage("Deploy SQL script ${file.path}") {
 																				echo "${file.path}"
 																				def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
-																				println("Renaming ${file.name} to ${timestamp}__${file.name}")
-																				file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$file.name")
+																				println("Renaming ${fileBaseName} to ${timestamp}__${fileBaseName}")
+																				file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$fileBaseName")
 
 																				stage('Build - DB Migration') {
 																					environment {
