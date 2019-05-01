@@ -96,6 +96,8 @@ pipeline {
 												// stash includes: '*.sql', name: 'db'
 												println(currentBuild.changeSets) 
 												println(currentBuild.changeSets.items)
+												def filename = "repo-02/V17__create_table.sql"
+												def fileBaseName = filename.toString().split('/').last()
             								//}
         								}
         								//stage('Create Build Cucumber Reporting') {
@@ -144,8 +146,10 @@ pipeline {
 																	try {
 																		// Fails with non-zero exit if dir1 does not exist 
 																		//def fileBaseName = sh(script: "$(basename ${file.path} .sql)", returnStdout:true).trim()
-																		def cwd = sh(script: 'basename $(filename)', returnStdout: true).trim()
-																		println(cwd)
+																		def fileBaseName = filename.toString().split('/').last()
+
+																		//def cwd = sh(script: 'basename $($filename)', returnStdout: true).trim()
+																		println(fileBaseName)
 																	} catch (Exception ex) {
 																		println("Unable to read fileBaseName: ${ex}")
 																	}
