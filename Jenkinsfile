@@ -181,6 +181,8 @@ pipeline {
 																				//file.renameTo("$file.parentFile.absolutePath$file.separator${timestamp}__$fileBaseName")
 																				stage('Build - DB Migration') {
 																					println("Build - DB Migration , Deploy  ------- ${fileBaseName} ------ on ---- ${repo}")
+																					def FLYWAY_LOCATIONS = null
+																					 
 																					environment {
 																							FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}'
 																							FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
