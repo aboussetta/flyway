@@ -192,7 +192,9 @@ pipeline {
 																							SQLPLUS_PATH='/Users/abderrahim.boussetta/instantclient_12_2/'
 																							SQLPLUS_URL='//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
 																					}
-																					println("Build - DB Migration , Run Flyway Migration - Status Before When")
+																					echo "${FLYWAY_LOCATIONS}"
+																					println(FLYWAY_LOCATIONS)
+
 																					//when {
 																					//	expression {
 																					//		currentBuild.result == null || currentBuild.result == 'SUCCESS' 
@@ -202,7 +204,7 @@ pipeline {
 																					// steps {
 																						echo 'Run Flyway Migration - Status Before Rollout'
 																						script{
-																							def ret_flyway_migrate = sh(script: '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS info', returnStdout: true)
+																							def ret_flyway_migrate = sh(script: '${FLYWAY_PATH}/flyway -user=${FLYWAY_USER} -password=${FLYWAY_PASSWORD} -url=${FLYWAY_URL} -locations=${FLYWAY_LOCATIONS} info', returnStdout: true)
 																							println(ret_flyway_migrate)
 																						}
 																						echo 'Run Flyway Migration'
