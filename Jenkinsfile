@@ -107,7 +107,8 @@ pipeline {
 												def FLYWAY_EDITION="enterprise"
 												def SQLPLUS_PATH="/Users/abderrahim.boussetta/instantclient_12_2/"
 												def SQLPLUS_URL="//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY"
-												echo 'Run Flyway Migration - Status Before Rollout'
+												 
+												echo 'Run Flyway Migration - Testing Flyway Info'
 												script{
 													def ret_flyway_migrate_info = sh(script: "${FLYWAY_PATH}/flyway -user=${FLYWAY_USER} -password=${FLYWAY_PASSWORD} -url=${FLYWAY_URL} -locations=${FLYWAY_LOCATIONS} info", returnStdout: true)
 													println(ret_flyway_migrate_info)
