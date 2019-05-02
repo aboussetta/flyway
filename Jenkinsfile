@@ -98,6 +98,21 @@ pipeline {
 												println(currentBuild.changeSets.items)
 												//def FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
 												//println(FLYWAY_LOCATIONS)
+												def FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
+												def FLYWAY_URL="jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY"
+												def FLYWAY_USER="flyway"
+												def FLYWAY_PASSWORD="flyway_123"
+												def FLYWAY_SCHEMAS="FLYWAY"
+												def FLYWAY_PATH="/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420"
+												def FLYWAY_EDITION="enterprise"
+												def SQLPLUS_PATH="/Users/abderrahim.boussetta/instantclient_12_2/"
+												def SQLPLUS_URL="//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY"
+												echo 'Run Flyway Migration - Status Before Rollout'
+												script{
+													def ret_flyway_migrate_info = sh(script: "${FLYWAY_PATH}/flyway -user=${FLYWAY_USER} -password=${FLYWAY_PASSWORD} -url=${FLYWAY_URL} -locations=${FLYWAY_LOCATIONS} info", returnStdout: true)
+													println(ret_flyway_migrate_info)
+												}
+	
             								//}
         								}
         								//stage('Create Build Cucumber Reporting') {
@@ -206,10 +221,10 @@ pipeline {
 																					println("Build - DB Migration , Run Flyway Migration - Status Before Rollout")
 																					// steps {
 																						echo 'Run Flyway Migration - Status Before Rollout'
-																						//script{
+																						script{
 																							def ret_flyway_migrate_info = sh(script: "${FLYWAY_PATH}/flyway -user=${FLYWAY_USER} -password=${FLYWAY_PASSWORD} -url=${FLYWAY_URL} -locations=${FLYWAY_LOCATIONS} info", returnStdout: true)
 																							println(ret_flyway_migrate_info)
-																						//}
+																						}
 																						echo 'Run Flyway Migration'
 																						script{
 																								def ret_flyway_migrate = sh(script: "${FLYWAY_PATH}/flyway -user=${FLYWAY_USER} -password=${FLYWAY_PASSWORD} -url=${FLYWAY_URL} -locations=${FLYWAY_LOCATIONS} migrate", returnStdout: true)
