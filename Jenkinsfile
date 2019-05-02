@@ -33,7 +33,7 @@ def performDeploymentStages(String node, String app) {
 def showRunPipeline() {
   												echo "Gathering SCM SQL changes Pipelines"
 												
-												script{
+												//script{
 													def fileBaseName = null
 													def parallelSQLs = [:]
 													def changeLogSets = currentBuild.changeSets
@@ -365,7 +365,7 @@ def showRunPipeline() {
 													echo " before parallel parallelSQLs"
 													echo "${parallelSQLs}"
 													parallel parallelSQLs
-												}
+												//}
 }
 
 
@@ -413,7 +413,7 @@ pipeline {
 								def repo = listRepositories[r]
 								println(repo)
 								parallelRepos["${repo}"] = {
-                            		node {
+                            		//node {
                                 		stage("${repo}") {
 											//steps{
 												println("stage - before checkout ${repo}")
@@ -470,7 +470,7 @@ pipeline {
 												//			emailPrompt: "Build ${currentBuild.description} is ready to BUILD."
 												//}
 											}
-										}	
+										//}	
 									}
 								}
 								parallel parallelRepos
