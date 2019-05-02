@@ -27,11 +27,118 @@ def performDeploymentStages(String node, String app) {
         echo "Testing the app [${app}] on node [${node}]"
     }
 }
-
+showChangeLogs()
 
 @NonCPS
-def showRunPipeline() {
-  												echo "Gathering SCM SQL changes Pipelines"
+def showChangeLogs() {
+  def changeLogSets = currentBuild.rawBuild.changeSets
+  for (int i = 0; i < changeLogSets.size(); i++) {
+     def entries = changeLogSets[i].items
+     for (int j = 0; j < entries.length; j++) {
+          def entry = entries[j]
+          echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
+          def files = new ArrayList(entry.affectedFiles)
+          for (int k = 0; k < files.size(); k++) {
+              def file = files[k]
+              echo "  ${file.editType.name} ${file.path}"
+          }
+      }
+  }
+}
+
+
+pipeline {
+    agent any
+    triggers {
+        pollSCM('* * * * *')
+    }
+
+	//environment {
+	//}
+
+	//libraries {
+	//}
+
+	//options {
+	//}
+
+	parameters {
+        string(name: 'REPOS', defaultValue: 'flyway,repo-01,repo-02,repo-03', description: 'Nodes to build, deploy and test')
+        choice(name: 'ENV', choices: 'qa', description: 'Environment')
+        string(name: 'SQLs', defaultValue: 'script1,script2', description: 'Script names')
+    }
+
+
+	//tools {
+	//}
+	//logRotator {
+  	//	Remove logs after two days
+  	//	daysToKeep(2)
+	//}
+	// using the Timestamper plugin we can add timestamps to the console log
+  	//options {
+    //	timestamps()
+  	//}
+    stages {	
+        stage('Initiate') {
+	        stages {
+				stage('Initiate Github Repository Pipelines'){
+    	        	steps {
+						script{
+							def parallelRepos = [:]
+							def listRepositories = ["flyway", "repo-01", "repo-02", "repo-03"]
+							for (int r = 0; r < listRepositories.size(); r++) {
+								def repo = listRepositories[r]
+								println(repo)
+								parallelRepos["${repo}"] = {
+                            		node {
+                                		stage("${repo}") {
+											//steps{
+												println("stage - before checkout ${repo}")
+											//}
+                                		}
+										stage("Checkout ${repo}") {
+            								//steps {
+                								echo "Run Flyway Github"
+												println("git - ${repo}")
+												//dir("${repo}") {
+    											//	checkout scm
+												//}
+                								git "https://github.com/aboussetta/flyway.git"
+												println(currentBuild.changeSets)
+												dir('${repo}') {
+    												checkout scm
+												}
+												// checkout scm
+												sh "cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
+												// stash includes: '*.sql', name: 'db'
+												println(currentBuild.changeSets) 
+												println(currentBuild.changeSets.items)
+												//def FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
+												//println(FLYWAY_LOCATIONS)
+			
+	
+            								//}
+        								}
+        								//stage('Create Build Cucumber Reporting') {
+										//	steps {
+                						//		cucumber buildStatus: "UNSTABLE",
+                    					//			fileIncludePattern: "**/cucumber.json",
+                    					//			jsonReportDirectory: 'target'
+										//	}
+										//}
+        								stage('Create Build Pipelines') {
+            								//steps {
+												echo "Cucumber Reporting"
+												// Make the output directory.
+												//sh "mkdir -p output"
+												// Write an useful file, which is needed to be archived.
+												//writeFile file: "output/usefulfile.txt", text: "This file is useful, need to archive it."
+												// Write an useless file, which is not needed to be archived.
+												//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
+												// 
+												//cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
+												echo "Gathering SCM SQL changes Pipelines"
 												
 												script{
 													def fileBaseName = null
@@ -366,101 +473,7 @@ def showRunPipeline() {
 													echo "${parallelSQLs}"
 													parallel parallelSQLs
 												}
-}
 
-
-pipeline {
-    agent any
-    triggers {
-        pollSCM('* * * * *')
-    }
-
-	//environment {
-	//}
-
-	//libraries {
-	//}
-
-	//options {
-	//}
-
-	parameters {
-        string(name: 'REPOS', defaultValue: 'flyway,repo-01,repo-02,repo-03', description: 'Nodes to build, deploy and test')
-        choice(name: 'ENV', choices: 'qa', description: 'Environment')
-        string(name: 'SQLs', defaultValue: 'script1,script2', description: 'Script names')
-    }
-
-
-	//tools {
-	//}
-	//logRotator {
-  	//	Remove logs after two days
-  	//	daysToKeep(2)
-	//}
-	// using the Timestamper plugin we can add timestamps to the console log
-  	//options {
-    //	timestamps()
-  	//}
-    stages {	
-        stage('Initiate') {
-	        stages {
-				stage('Initiate Github Repository Pipelines'){
-    	        	steps {
-						script{
-							def parallelRepos = [:]
-							def listRepositories = ["flyway", "repo-01", "repo-02", "repo-03"]
-							for (int r = 0; r < listRepositories.size(); r++) {
-								def repo = listRepositories[r]
-								println(repo)
-								parallelRepos["${repo}"] = {
-                            		node {
-                                		stage("${repo}") {
-											//steps{
-												println("stage - before checkout ${repo}")
-											//}
-                                		}
-										stage("Checkout ${repo}") {
-            								//steps {
-                								echo "Run Flyway Github"
-												println("git - ${repo}")
-												//dir("${repo}") {
-    											//	checkout scm
-												//}
-                								git "https://github.com/aboussetta/flyway.git"
-												println(currentBuild.changeSets)
-												dir('${repo}') {
-    												checkout scm
-												}
-												// checkout scm
-												sh "cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
-												// stash includes: '*.sql', name: 'db'
-												println(currentBuild.changeSets) 
-												println(currentBuild.changeSets.items)
-												//def FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
-												//println(FLYWAY_LOCATIONS)
-			
-	
-            								//}
-        								}
-        								//stage('Create Build Cucumber Reporting') {
-										//	steps {
-                						//		cucumber buildStatus: "UNSTABLE",
-                    					//			fileIncludePattern: "**/cucumber.json",
-                    					//			jsonReportDirectory: 'target'
-										//	}
-										//}
-        								stage('Create Build Pipelines') {
-            								//steps {
-												echo "Cucumber Reporting"
-												// Make the output directory.
-												//sh "mkdir -p output"
-												// Write an useful file, which is needed to be archived.
-												//writeFile file: "output/usefulfile.txt", text: "This file is useful, need to archive it."
-												// Write an useless file, which is not needed to be archived.
-												//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
-												// 
-												//cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
-												showRunPipeline()
 												// Archive the build output artifacts.
 												// unstash 'db'
 												//archiveArtifacts artifacts: '*.sql', fingerprint: true
