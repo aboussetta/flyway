@@ -406,7 +406,7 @@ pipeline {
 	        stages {
 				stage('Initiate Github Repository Pipelines'){
     	        	steps {
-						//script{
+						script{
 							def parallelRepos = [:]
 							def listRepositories = ["flyway", "repo-01", "repo-02", "repo-03"]
 							for (int r = 0; r < listRepositories.size(); r++) {
@@ -474,7 +474,7 @@ pipeline {
 									}
 								}
 								parallel parallelRepos
-							//}
+							}
 							
 						}
 					}
