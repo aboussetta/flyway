@@ -404,7 +404,8 @@ pipeline {
         stage('Initiate') {
 	        stages {
 				stage('Initiate Github Repository Pipelines'){
-    	        	//steps {
+    	        	steps {
+						script{
 							stage("Checkout flyway") {
             					//steps {
                 				echo "Run Flyway Github"
@@ -459,9 +460,9 @@ pipeline {
 									//}
 								}
 								//parallel parallelRepos
-							//}
+							}
 							
-						//}
+						}
 					}
 				}
 			}
