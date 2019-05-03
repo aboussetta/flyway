@@ -30,19 +30,18 @@ def performDeploymentStages(String node, String app) {
 
 
 @NonCPS
-def showRunPipeline() {
-  												echo "Gathering SCM SQL changes Pipelines"
-												
-												//script{
-													def fileBaseName = null
-													def parallelSQLs = [:]
-													def changeLogSets = currentBuild.changeSets
-													for (int i = 0; i < changeLogSets.size(); i++) {
-														def entries = changeLogSets[i].items
-														for (int j = 0; j < entries.length; j++) {
-															def entry = entries[j]
-															echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
-															def files = new ArrayList(entry.affectedFiles)
+def showRunPipeline(String repo) {
+  	echo "Gathering SCM SQL changes Pipelines"
+	//script{
+	def fileBaseName = null
+	def parallelSQLs = [:]
+	def changeLogSets = currentBuild.changeSets
+	for (int i = 0; i < changeLogSets.size(); i++) {
+		def entries = changeLogSets[i].items
+		for (int j = 0; j < entries.length; j++) {
+			def entry = entries[j]
+			echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
+			def files = new ArrayList(entry.affectedFiles)
 															for (int k = 0; k < files.size(); k++) {
 																def file = files[k]
 																echo "hey, ${file.editType.name}, ${file.path}"
@@ -460,7 +459,7 @@ pipeline {
 												//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
 												// 
 												//cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
-												showRunPipeline()
+												showRunPipeline(repo)
 												// Archive the build output artifacts.
 												// unstash 'db'
 												//archiveArtifacts artifacts: '*.sql', fingerprint: true
