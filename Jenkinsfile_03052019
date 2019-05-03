@@ -405,28 +405,42 @@ pipeline {
 	        stages {
 				stage('Initiate Github Repository Pipelines'){
     	        	steps {
-							stage("Checkout flyway") {
-            					//steps {
-                				echo "Run Flyway Github"
-								println("git - flyway")
-								//dir("${repo}") {
-    							//	checkout scm
-								//}
-                				git "https://github.com/aboussetta/flyway.git"
-								println(currentBuild.changeSets)
-								dir('flyway') {
-    								checkout scm
-								}
-								// checkout scm
-								
-								sh "cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway"
-								// stash includes: '*.sql', name: 'db'
-								println(currentBuild.changeSets) 
-								println(currentBuild.changeSets.items)
-								//def FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
-								//println(FLYWAY_LOCATIONS)
+						script{
+							def parallelRepos = [:]
+							def listRepositories = ["flyway", "repo-01", "repo-02", "repo-03"]
+							for (int r = 0; r < listRepositories.size(); r++) {
+								def repo = listRepositories[r]
+								println(repo)
+								parallelRepos["${repo}"] = {
+                            		//node {
+                                		stage("${repo}") {
+											//steps{
+												println("stage - before checkout ${repo}")
 											//}
-        						}
+                                		}
+										stage("Checkout ${repo}") {
+            								//steps {
+                								echo "Run Flyway Github"
+												println("git - ${repo}")
+												//dir("${repo}") {
+    											//	checkout scm
+												//}
+                								git "https://github.com/aboussetta/flyway.git"
+												println(currentBuild.changeSets)
+												dir('${repo}') {
+    												checkout scm
+												}
+												// checkout scm
+												sh "cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
+												// stash includes: '*.sql', name: 'db'
+												println(currentBuild.changeSets) 
+												println(currentBuild.changeSets.items)
+												//def FLYWAY_LOCATIONS="filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/${repo}"
+												//println(FLYWAY_LOCATIONS)
+			
+	
+            								//}
+        								}
         								//stage('Create Build Cucumber Reporting') {
 										//	steps {
                 						//		cucumber buildStatus: "UNSTABLE",
@@ -434,7 +448,7 @@ pipeline {
                     					//			jsonReportDirectory: 'target'
 										//	}
 										//}
-        						stage('Create Build Pipelines') {
+        								stage('Create Build Pipelines') {
             								//steps {
 												echo "Cucumber Reporting"
 												// Make the output directory.
@@ -445,7 +459,7 @@ pipeline {
 												//writeFile file: "output/uselessfile.md", text: "This file is useless, no need to archive it."
 												// 
 												//cucumber failedFeaturesNumber: -1, failedScenariosNumber: -1, failedStepsNumber: -1, fileIncludePattern: '**/*.json', pendingStepsNumber: -1, skippedStepsNumber: -1, sortingMethod: 'ALPHABETICAL', undefinedStepsNumber: -1
-												showRunPipeline("flyway")
+												showRunPipeline(repo)
 												// Archive the build output artifacts.
 												// unstash 'db'
 												//archiveArtifacts artifacts: '*.sql', fingerprint: true
@@ -454,12 +468,12 @@ pipeline {
 												//			message: "Press OK to initiate BUILD ?",
 												//			emailPrompt: "Build ${currentBuild.description} is ready to BUILD."
 												//}
-											//}
+											}
 										//}	
-									//}
+									}
 								}
-								//parallel parallelRepos
-							//}
+								parallel parallelRepos
+							}
 							
 						}
 					}
