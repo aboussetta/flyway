@@ -10,7 +10,7 @@ pipeline {
                 echo 'Run Flyway Github'
                 git 'https://github.com/aboussetta/flyway.git'
 		        checkout scm
-                stash includes: '*.sql', name: 'db' 
+                //stash includes: '*.sql', name: 'db' 
 		        sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
             }
         }
@@ -25,7 +25,7 @@ pipeline {
             }
             steps {
                 echo 'Run Flyway Migration'
-		        unstash 'db'
+		//        unstash 'db'
                 sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 	    	}
         }
@@ -51,7 +51,7 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-				        unstash 'db'
+				//        unstash 'db'
 		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 			    }
 		 }
@@ -66,7 +66,7 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-				        unstash 'db'
+				        //unstash 'db'
 		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
 			    }
 		        }
@@ -115,7 +115,7 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-				        unstash 'db'
+				        //unstash 'db'
 		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
 			    }
 		        }
@@ -130,7 +130,7 @@ pipeline {
 		            }
 		            steps {
 		                echo 'Run Flyway Migration'
-				        unstash 'db'
+				        //unstash 'db'
 		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'            
 			
 			    }
@@ -157,7 +157,7 @@ pipeline {
         }
         steps {
             echo 'Run Flyway Migration'
-            unstash 'db'
+            //unstash 'db'
             sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
         }
     }
