@@ -9,24 +9,24 @@ pipeline {
             steps {
                 echo 'Run Flyway Github'
                 git 'https://github.com/aboussetta/flyway.git'
-		        checkout scm
+		checkout scm
                 //stash includes: '*.sql', name: 'db' 
-		        //sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
-		        sh 'cd i/var/lib/jenkins/workspace/pipeline_oracle'
+		//sh 'cd /Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle'
+		sh 'cd /var/lib/jenkins/workspace/pipeline_oracle'
             }
         }
         stage('Build - DB Migration') {
             environment {
-		        FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
+		FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
                 FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DV_FLYWAY'
                 FLYWAY_USER='flyway'
                 FLYWAY_PASSWORD='flyway_123'
                 FLYWAY_SCHEMAS='FLYWAY'
-				FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
+		FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
             }
             steps {
                 echo 'Run Flyway Migration'
-		//        unstash 'db'
+		//unstash 'db'
                 sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
 	    	}
         }
@@ -34,23 +34,23 @@ pipeline {
             failFast true // first to fail abort parallel execution
             parallel {
 		stage('DEVA - DB Delivery') {
-				input {
-               		message "Should we continue?"
-                	ok "Yes, we should."
-                	submitter "Developer,DBA"
-                	parameters {
-                    string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
-                	}
-            	}				
-		          environment {
-				        FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
+			input {
+               			message "Should we continue?"
+                		ok "Yes, we should."
+                		submitter "Developer,DBA"
+                		parameters {
+                    			string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
+                		}
+            		}				
+		        environment {
+				FLYWAY_LOCATIONS='filesystem:/Users/abderrahim.boussetta/.jenkins/workspace/flyway_pipeline_oracle/flyway'
 		                FLYWAY_URL='jdbc:oracle:thin:@//hhdora-scan.dev.hh.perform.local:1521/DVA_FLYWAY'
 		                FLYWAY_USER='flyway_deva'
 		                FLYWAY_PASSWORD='flyway_123'
 		                FLYWAY_SCHEMAS='FLYWAY_DEVA'
-						FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
-		            }
-		            steps {
+				FLYWAY_PATH='/Users/abderrahim.boussetta/.jenkins/tools/sp.sd.flywayrunner.installation.FlywayInstallation/flyway_420'
+		        }
+		        steps {
 		                echo 'Run Flyway Migration'
 				//        unstash 'db'
 		                sh '$FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
