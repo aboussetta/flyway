@@ -23,7 +23,6 @@ pipeline {
                 FLYWAY_PASSWORD='flyway_123'
                 FLYWAY_SCHEMAS='FLYWAY'
 		FLYWAY_PATH='/${WORKSPACE}/tools/sp.sd.flywayrunner.installation.FlywayInstallation/oracle_automation/flyway_420'
-		FLYWAY_CRED_ID='
             }
             steps {
                 echo 'Run Flyway Migration'
