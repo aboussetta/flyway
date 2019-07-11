@@ -27,7 +27,7 @@ pipeline {
             steps {
                 echo 'Run Flyway Migration'
 		echo "${WORKSPACE}"
-		sh 'which flyway'
+		sh 'whereis flyway'
 		sh 'locate flyway'
 		sh 'ls -ltr'
 		//unstash 'db'
