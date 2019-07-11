@@ -28,7 +28,7 @@ pipeline {
                 echo 'Run Flyway Migration'
 		echo "${WORKSPACE}"
 		sh 'whereis flyway'
-		sh 'ls -ltr'
+		sh 'ls -ltr /usr/bin'
 		//unstash 'db'
 		//flywayrunner installationName: 'flywaytool', flywayCommand: 'migrate', credentialsId: $FLYWAY_USER/$FLYWAY_PASSWORD, url: $FLYWAY_URL', locations: $FLYWAY_LOCATIONS
                 sh 'sudo $FLYWAY_PATH/flyway -user=$FLYWAY_USER -password=$FLYWAY_PASSWORD -url=$FLYWAY_URL -locations=$FLYWAY_LOCATIONS migrate'
