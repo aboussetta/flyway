@@ -22,7 +22,7 @@ pipeline {
                 FLYWAY_USER='flyway'
                 FLYWAY_PASSWORD='flyway_123'
                 FLYWAY_SCHEMAS='FLYWAY'
-		FLYWAY_PATH='/opt/flyway'
+		FLYWAY_PATH='/usr/bin'
             }
             steps {
                 echo 'Run Flyway Migration'
