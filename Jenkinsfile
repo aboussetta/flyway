@@ -28,7 +28,7 @@ pipeline {
                 echo 'Run Flyway Migration'
 		echo "${WORKSPACE}"
 		sh 'whereis flyway'
-		sh 'python --version'
+		sh 'flyway info'
 		sh 'ls -ltr /usr/bin'
 		//unstash 'db'
 		//flywayrunner installationName: 'flywaytool', flywayCommand: 'migrate', credentialsId: $FLYWAY_USER/$FLYWAY_PASSWORD, url: $FLYWAY_URL', locations: $FLYWAY_LOCATIONS
